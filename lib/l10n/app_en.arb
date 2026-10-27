@@ -1,0 +1,539 @@
+{
+  "@@locale": "en",
+
+  "appName": "MasterJi",
+  "@appName": { "description": "App name" },
+
+  "appTagline": "Check OMR sheets in seconds",
+  "@appTagline": {},
+
+  "namaskar": "Namaskar",
+  "@namaskar": {},
+
+  "namaskarName": "Namaskar, {name}",
+  "@namaskarName": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+
+  "today": "Today, {date}",
+  "@today": {
+    "placeholders": { "date": { "type": "String" } }
+  },
+
+  "home": "Home",
+  "@home": {},
+
+  "exams": "Exams",
+  "@exams": {},
+
+  "lessonPlans": "Lesson Plans",
+  "@lessonPlans": {},
+
+  "profile": "Profile",
+  "@profile": {},
+
+  "quickScan": "Quick Scan",
+  "@quickScan": {},
+
+  "quickScanSubtitle": "Scan answer key, then student sheets. No setup.",
+  "@quickScanSubtitle": {},
+
+  "examsScanSubtitle": "Scan OMR by exam",
+  "@examsScanSubtitle": {},
+
+  "continueWithGoogle": "Continue with Google",
+  "@continueWithGoogle": {},
+
+  "skipForNow": "Skip for now",
+  "@skipForNow": {},
+
+  "youGet20FreeScans": "You get 20 free scans",
+  "@youGet20FreeScans": {},
+
+  "freeScansLeft": "{count} free scans left",
+  "@freeScansLeft": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "premiumBadge": "Premium",
+  "@premiumBadge": {},
+
+  "premium": "Premium",
+  "@premium": {},
+
+  "goPremium": "Go Premium",
+  "@goPremium": {},
+
+  "premiumTitle": "Go Premium",
+  "@premiumTitle": {},
+
+  "unlimitedScans": "Unlimited scans",
+  "@unlimitedScans": {},
+
+  "createExamsWithSets": "Create exams with sets",
+  "@createExamsWithSets": {},
+
+  "classAndSectionResults": "Class & section wise results",
+  "@classAndSectionResults": {},
+
+  "monthly": "Monthly",
+  "@monthly": {},
+
+  "yearly": "Yearly",
+  "@yearly": {},
+
+  "bestValue": "Best value",
+  "@bestValue": {},
+
+  "pay": "Pay",
+  "@pay": {},
+
+  "paymentsComingSoon": "Payments coming soon",
+  "@paymentsComingSoon": {},
+
+  "maybeLater": "Maybe later",
+  "@maybeLater": {},
+
+  "continueWithGoogleToUpgrade": "Continue with Google to upgrade",
+  "@continueWithGoogleToUpgrade": {},
+
+  "scanAnswerKey": "Scan answer key",
+  "@scanAnswerKey": {},
+
+  "enterManually": "Enter manually instead",
+  "@enterManually": {},
+
+  "useThisKey": "Use this key",
+  "@useThisKey": {},
+
+  "nextSheet": "Next sheet",
+  "@nextSheet": {},
+
+  "rescanThisSheet": "Rescan this sheet",
+  "@rescanThisSheet": {},
+
+  "finish": "Finish",
+  "@finish": {},
+
+  "correct": "Correct",
+  "@correct": {},
+
+  "wrong": "Wrong",
+  "@wrong": {},
+
+  "skipped": "Skipped",
+  "@skipped": {},
+
+  "marks": "Marks",
+  "@marks": {},
+
+  "seeAnswers": "See answers",
+  "@seeAnswers": {},
+
+  "hideAnswers": "Hide answers",
+  "@hideAnswers": {},
+
+  "checking": "Checking…",
+  "@checking": {},
+
+  "sheetNumber": "Sheet #{number}",
+  "@sheetNumber": {
+    "placeholders": { "number": { "type": "int" } }
+  },
+
+  "continueScanning": "Continue scanning",
+  "@continueScanning": {},
+
+  "clearSession": "Clear session",
+  "@clearSession": {},
+
+  "sessionSummary": "Session Summary",
+  "@sessionSummary": {},
+
+  "sheets": "{count} sheets",
+  "@sheets": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "average": "Average",
+  "@average": {},
+
+  "highest": "Highest",
+  "@highest": {},
+
+  "lowest": "Lowest",
+  "@lowest": {},
+
+  "mostMissed": "Most missed questions",
+  "@mostMissed": {},
+
+  "createExam": "Create Exam",
+  "@createExam": {},
+
+  "newExam": "+ New Exam",
+  "@newExam": {},
+
+  "examName": "Exam name",
+  "@examName": {},
+
+  "examNameHint": "e.g. Half Yearly 2026",
+  "@examNameHint": {},
+
+  "subjects": "Subjects",
+  "@subjects": {},
+
+  "subject": "Subject",
+  "@subject": {},
+
+  "classesAndSections": "Classes & Sections",
+  "@classesAndSections": {},
+
+  "class_": "Class",
+  "@class_": {},
+
+  "sections": "Sections",
+  "@sections": {},
+
+  "next": "Next",
+  "@next": {},
+
+  "back": "Back",
+  "@back": {},
+
+  "save": "Save",
+  "@save": {},
+
+  "cancel": "Cancel",
+  "@cancel": {},
+
+  "delete": "Delete",
+  "@delete": {},
+
+  "rename": "Rename",
+  "@rename": {},
+
+  "questionCount": "Number of questions",
+  "@questionCount": {},
+
+  "custom": "Custom",
+  "@custom": {},
+
+  "marksPerCorrect": "Marks per correct answer",
+  "@marksPerCorrect": {},
+
+  "negativeMarking": "Negative marking",
+  "@negativeMarking": {},
+
+  "penaltyPerWrong": "Penalty per wrong answer",
+  "@penaltyPerWrong": {},
+
+  "paperHasSets": "This paper has different sets",
+  "@paperHasSets": {},
+
+  "set_": "Set",
+  "@set_": {},
+
+  "addAnswerKey": "Add answer key",
+  "@addAnswerKey": {},
+
+  "answerKeyAdded": "Answer key added ✓",
+  "@answerKeyAdded": {},
+
+  "answerKeyMissing": "Key missing",
+  "@answerKeyMissing": {},
+
+  "scanOMR": "Scan OMR",
+  "@scanOMR": {},
+
+  "paperSettings": "Paper settings",
+  "@paperSettings": {},
+
+  "logIn": "Log in",
+  "@logIn": {},
+
+  "logOut": "Log out",
+  "@logOut": {},
+
+  "logOutConfirm": "Are you sure you want to log out? Your local data stays on this device.",
+  "@logOutConfirm": {},
+
+  "guestMode": "You're using MasterJi as a guest",
+  "@guestMode": {},
+
+  "planFree": "Free plan",
+  "@planFree": {},
+
+  "planPremium": "👑 Premium",
+  "@planPremium": {},
+
+  "unlimitedScansShort": "Unlimited scans · Exams unlocked",
+  "@unlimitedScansShort": {},
+
+  "freeScansProgress": "{used} of 20 free scans used",
+  "@freeScansProgress": {
+    "placeholders": { "used": { "type": "int" } }
+  },
+
+  "school": "School",
+  "@school": {},
+
+  "schoolHint": "Your school name (optional)",
+  "@schoolHint": {},
+
+  "editSchool": "Edit school",
+  "@editSchool": {},
+
+  "language": "Language",
+  "@language": {},
+
+  "helpAndShare": "Help & Share",
+  "@helpAndShare": {},
+
+  "whatsappSupport": "WhatsApp support",
+  "@whatsappSupport": {},
+
+  "shareApp": "Share app",
+  "@shareApp": {},
+
+  "rateApp": "Rate app",
+  "@rateApp": {},
+
+  "aboutAndPrivacy": "About & privacy",
+  "@aboutAndPrivacy": {},
+
+  "version": "Version",
+  "@version": {},
+
+  "notifyMe": "Notify me",
+  "@notifyMe": {},
+
+  "wellLetYouKnow": "We'll let you know!",
+  "@wellLetYouKnow": {},
+
+  "lessonPlansDescription": "Personalised lesson plans for your class, coming soon.",
+  "@lessonPlansDescription": {},
+
+  "whichSubjectMost": "Which do you need most?",
+  "@whichSubjectMost": {},
+
+  "noExamsYet": "No exams yet",
+  "@noExamsYet": {},
+
+  "createFirstExam": "Create your first exam",
+  "@createFirstExam": {},
+
+  "tryQuickScanInstead": "Try Quick Scan instead",
+  "@tryQuickScanInstead": {},
+
+  "checkOMRInSeconds": "Check OMR sheets in seconds",
+  "@checkOMRInSeconds": {},
+
+  "loginBanner": "Log in with Google to keep your account safe",
+  "@loginBanner": {},
+
+  "quickScanInProgress": "Quick Scan in progress",
+  "@quickScanInProgress": {},
+
+  "continueCurrentKey": "Continue with the current answer key?",
+  "@continueCurrentKey": {},
+
+  "startNew": "Start new",
+  "@startNew": {},
+
+  "continue_": "Continue",
+  "@continue_": {},
+
+  "saveAsExam": "Save as an exam",
+  "@saveAsExam": {},
+
+  "filledCount": "{count} / {total} filled",
+  "@filledCount": {
+    "placeholders": {
+      "count": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+
+  "jumpToQuestion": "Jump to question",
+  "@jumpToQuestion": {},
+
+  "nowScanningSet": "Now scanning {set}",
+  "@nowScanningSet": {
+    "placeholders": { "set": { "type": "String" } }
+  },
+
+  "noAnswerKey": "No answer key added yet",
+  "@noAnswerKey": {},
+
+  "addAnswerKeyFirst": "Add the answer key before scanning",
+  "@addAnswerKeyFirst": {},
+
+  "debugSection": "Debug panel (dev only)",
+  "@debugSection": {},
+
+  "resetFreeScans": "Reset free scans to 20",
+  "@resetFreeScans": {},
+
+  "isLoggedInMock": "Logged in (mock)",
+  "@isLoggedInMock": {},
+
+  "isPremiumMock": "Premium (mock)",
+  "@isPremiumMock": {},
+
+  "subjectCount": "{count} subjects",
+  "@subjectCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "answerKeysProgress": "{done} of {total} answer keys added",
+  "@answerKeysProgress": {
+    "placeholders": {
+      "done": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+
+  "recentlyUsed": "Continue",
+  "@recentlyUsed": {},
+
+  "startScanning": "Start scanning",
+  "@startScanning": {},
+
+  "selectExam": "Select exam",
+  "@selectExam": {},
+
+  "selectSubject": "Select subject",
+  "@selectSubject": {},
+
+  "selectClass": "Select class & section",
+  "@selectClass": {},
+
+  "selectSet": "Select set",
+  "@selectSet": {},
+
+  "gallery": "Gallery",
+  "@gallery": {},
+
+  "confirmDeleteTitle": "Delete \"{name}\"?",
+  "@confirmDeleteTitle": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+
+  "confirmDeleteBody": "This action cannot be undone.",
+  "@confirmDeleteBody": {},
+
+  "successExamCreated": "Exam created!",
+  "@successExamCreated": {},
+
+  "noSheetsYet": "No sheets scanned yet",
+  "@noSheetsYet": {},
+
+  "free20Left": "20 free scans left",
+  "@free20Left": {},
+
+  "used20Scans": "You've used your 20 free scans. Go Premium to keep scanning and create exams.",
+  "@used20Scans": {},
+
+  "odia": "ଓଡ଼ିଆ",
+  "@odia": {},
+
+  "english": "English",
+  "@english": {},
+
+  "chooseLanguage": "Choose your language",
+  "@chooseLanguage": {},
+
+  "tapToSwitch": "Tap to switch language any time in Profile",
+  "@tapToSwitch": {},
+
+  "classLabel": "Class {num}",
+  "@classLabel": {
+    "placeholders": { "num": { "type": "int" } }
+  },
+
+  "sectionLabel": "Section {letter}",
+  "@sectionLabel": {
+    "placeholders": { "letter": { "type": "String" } }
+  },
+
+  "setLabel": "Set {letter}",
+  "@setLabel": {
+    "placeholders": { "letter": { "type": "String" } }
+  },
+
+  "paperLabel": "{subject} · Class {classNum}",
+  "@paperLabel": {
+    "placeholders": {
+      "subject": { "type": "String" },
+      "classNum": { "type": "int" }
+    }
+  },
+
+  "oriya": "Odia",
+  "@oriya": {},
+
+  "math": "Math",
+  "@math": {},
+
+  "science": "Science",
+  "@science": {},
+
+  "socialScience": "Social Science",
+  "@socialScience": {},
+
+  "hindi": "Hindi",
+  "@hindi": {},
+
+  "sanskrit": "Sanskrit",
+  "@sanskrit": {},
+
+  "english2": "English",
+  "@english2": {},
+
+  "addOther": "Add other",
+  "@addOther": {},
+
+  "enterQuestion": "Enter question number",
+  "@enterQuestion": {},
+
+  "privacyPlaceholder": "MasterJi respects your privacy. All your data is stored only on your device. No personal data is collected or shared with third parties.\n\nFor support, contact us on WhatsApp.",
+  "@privacyPlaceholder": {},
+
+  "classSectionSet": "{subject} · Class {classNum}-{section} · {set}",
+  "@classSectionSet": {
+    "placeholders": {
+      "subject": { "type": "String" },
+      "classNum": { "type": "int" },
+      "section": { "type": "String" },
+      "set": { "type": "String" }
+    }
+  },
+
+  "sheetsChecked": "{count} sheets checked",
+  "@sheetsChecked": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "scoreFormula": "{correct} × {marksPerCorrect} − {wrong} × {penalty} = {total}",
+  "@scoreFormula": {
+    "placeholders": {
+      "correct": { "type": "int" },
+      "marksPerCorrect": { "type": "String" },
+      "wrong": { "type": "int" },
+      "penalty": { "type": "String" },
+      "total": { "type": "String" }
+    }
+  },
+
+  "examBenefitSets": "Sets A/B/C/D supported",
+  "@examBenefitSets": {},
+
+  "examBenefitClass": "Class & section wise",
+  "@examBenefitClass": {},
+
+  "lessonPlansComingSoon": "Coming soon",
+  "@lessonPlansComingSoon": {},
+
+  "examBenefitKeys": "Save answer keys for every paper",
+  "@examBenefitKeys": {}
+}

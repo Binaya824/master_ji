@@ -1,20 +1,46 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-import 'screens/home_screen.dart';
+import '../data/account_state.dart';
+import '../data/local_repository.dart';
+import '../data/settings_store.dart';
+import '../services/auth_service.dart';
+import '../services/mock_auth_service.dart';
+import '../services/mock_scan_service.dart';
+import '../services/scan_service.dart';
+import 'app/app.dart';
 
-void main() {
-  runApp(const OmrScannerApp());
-}
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
 
-class OmrScannerApp extends StatelessWidget {
-  const OmrScannerApp({super.key});
+  // Initialise settings store (SharedPreferences)
+  final settingsStore = await SettingsStore.create();
 
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'OMR Scanner',
-      theme: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple)),
-      home: const HomeScreen(),
-    );
-  }
+  runApp(
+    MultiProvider(
+      providers: [
+        // Settings/locale — ChangeNotifier so language switches rebuild the app
+        ChangeNotifierProvider<SettingsStore>.value(value: settingsStore),
+
+        // Account state
+        ChangeNotifierProvider<AccountState>(
+          create: (_) => AccountState(settingsStore),
+        ),
+
+        // Local data repository
+        Provider<LocalRepository>(
+          create: (_) => LocalRepository(),
+        ),
+
+        // Services — swap MockScanService / MockAuthService for real ones here
+        Provider<ScanService>(
+          create: (_) => MockScanService(),
+        ),
+        Provider<AuthService>(
+          create: (_) => MockAuthService(),
+        ),
+      ],
+      child: const MasterJiApp(),
+    ),
+  );
 }
