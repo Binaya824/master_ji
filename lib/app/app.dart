@@ -33,7 +33,7 @@ class _MasterJiAppState extends State<MasterJiApp> {
     final locale = Locale(settings.languageCode);
 
     return MaterialApp.router(
-      title: 'MasterJi',
+      title: 'Master Ji',
       debugShowCheckedModeBanner: kDebugMode,
       theme: AppTheme.light,
       routerConfig: _appRouter.router,

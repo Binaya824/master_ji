@@ -101,7 +101,7 @@ abstract class AppLocalizations {
   /// App name
   ///
   /// In en, this message translates to:
-  /// **'MasterJi'**
+  /// **'Master Ji'**
   String get appName;
 
   /// No description provided for @appTagline.

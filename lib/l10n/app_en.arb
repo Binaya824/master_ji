@@ -1,7 +1,7 @@
 {
   "@@locale": "en",
 
-  "appName": "MasterJi",
+  "appName": "Master Ji",
   "@appName": { "description": "App name" },
 
   "appTagline": "Check OMR sheets in seconds",
