@@ -17,6 +17,7 @@ dependencies:
   image_picker: ^1.1.2
   http: ^1.2.2
   path_provider: ^2.1.5
+  opencv_dart: ^2.2.2
 
   # State & Navigation
   provider: ^6.1.2
@@ -26,7 +27,7 @@ dependencies:
   shared_preferences: ^2.3.2
 
   # Localisation
-  intl: ^0.20.3
+  intl: ^0.20.2
 
   # Animations
   flutter_animate: ^4.5.0

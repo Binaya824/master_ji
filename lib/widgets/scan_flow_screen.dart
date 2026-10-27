@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../models/omr_result.dart';
-import '../services/api_service.dart';
+import '../services/omr_service.dart';
 import 'image_source_sheet.dart';
 
 /// Shared pick -> upload -> preview flow used by both the answer-key and
@@ -42,7 +42,7 @@ class _ScanFlowScreenState extends State<ScanFlowScreen> {
     });
 
     try {
-      final result = await ApiService.process(file);
+      final result = await OmrService.process(file);
       await widget.onResult?.call(result);
       setState(() {
         _result = result;

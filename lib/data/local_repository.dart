@@ -5,6 +5,7 @@ import 'package:path_provider/path_provider.dart';
 
 import '../models/exam.dart';
 import '../models/quick_scan_state.dart';
+import '../services/storage_service.dart';
 
 /// Persists exam data and scan sessions to the device's documents directory
 /// as JSON files. All operations are async and safe to call from UI code.
@@ -154,6 +155,10 @@ class LocalRepository {
   Future<void> clearQuickScan() async {
     final file = await _file(_quickScanFile);
     if (await file.exists()) await file.delete();
+  }
+
+  Future<File> saveAnswerKeyJson(Map<int, int> answers, {int? total}) async {
+    return StorageService.saveAnswersJson(answers, total: total);
   }
 
   // ── Recently used papers (last 3 papers with scan sessions) ─────────────

@@ -194,13 +194,33 @@ class _QuickScanSetupScreenState extends State<QuickScanSetupScreen> {
 
     if (_loading) {
       return Scaffold(
-        appBar: AppBar(title: Text(l10n.quickScan)),
+        appBar: AppBar(
+          leading: BackButton(
+            onPressed: () {
+              if (context.canPop()) {
+                context.pop();
+              } else {
+                context.go(AppRoutes.home);
+              }
+            },
+          ),
+          title: Text(l10n.quickScan),
+        ),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
 
     return Scaffold(
       appBar: AppBar(
+        leading: BackButton(
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go(AppRoutes.home);
+            }
+          },
+        ),
         title: Text(l10n.quickScan),
       ),
       body: SafeArea(

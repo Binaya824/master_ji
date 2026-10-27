@@ -11,7 +11,6 @@ import '../features/exams/exams_list_screen.dart';
 import '../features/exams/paper_settings_screen.dart';
 import '../features/exams/subject_detail_screen.dart';
 import '../features/home/home_screen.dart';
-import '../features/lesson_plans/lesson_plans_screen.dart';
 import '../features/onboarding/language_screen.dart';
 import '../features/onboarding/login_screen.dart';
 import '../features/onboarding/splash_screen.dart';
@@ -107,14 +106,6 @@ class AppRouter {
               GoRoute(
                 path: AppRoutes.exams,
                 builder: (context, state) => const ExamsListScreen(),
-              ),
-            ],
-          ),
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: AppRoutes.lessonPlans,
-                builder: (context, state) => const LessonPlansScreen(),
               ),
             ],
           ),
@@ -253,11 +244,6 @@ class _AppShell extends StatelessWidget {
         icon: const Icon(Icons.folder_outlined),
         selectedIcon: const Icon(Icons.folder),
         label: l10n?.exams ?? 'Exams',
-      ),
-      NavigationDestination(
-        icon: const Icon(Icons.menu_book_outlined),
-        selectedIcon: const Icon(Icons.menu_book),
-        label: l10n?.lessonPlans ?? 'Plans',
       ),
       NavigationDestination(
         icon: const Icon(Icons.person_outline),

@@ -6,6 +6,7 @@ import 'package:omr_scanner/data/local_repository.dart';
 import 'package:omr_scanner/l10n/app_localizations.dart';
 import 'package:omr_scanner/models/exam.dart';
 import 'package:omr_scanner/services/scan_service.dart';
+import 'package:omr_scanner/services/storage_service.dart';
 import 'package:omr_scanner/theme/app_colors.dart';
 import 'package:omr_scanner/theme/app_text.dart';
 import 'package:omr_scanner/theme/app_theme.dart';
@@ -149,6 +150,7 @@ class _AnswerKeyScreenState extends State<AnswerKeyScreen> {
 
     final repo = context.read<LocalRepository>();
     await repo.saveExam(exam);
+    await StorageService.saveAnswersJson(_answers, total: paper.questionCount);
 
     if (!mounted) return;
 
@@ -327,7 +329,7 @@ class _AnswerKeyScreenState extends State<AnswerKeyScreen> {
                     ),
                   ),
                 _KeyScreenState.reviewing => AnswerGrid.edit(
-                    key: ValueKey('grid_${_answers.length}_$totalQuestions'),
+                    key: ValueKey('grid_$totalQuestions'),
                     questionCount: totalQuestions,
                     initialAnswers: _answers,
                     onChanged: (updated) {

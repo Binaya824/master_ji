@@ -92,14 +92,6 @@ class HomeScreen extends StatelessWidget {
                               .animate(delay: 180.ms)
                               .fadeIn(duration: 350.ms)
                               .slideY(begin: 0.1, end: 0),
-
-                          const SizedBox(height: AppTheme.sp12),
-
-                          // Lesson Plans card
-                          _LessonPlansCard(l10n: l10n)
-                              .animate(delay: 260.ms)
-                              .fadeIn(duration: 350.ms)
-                              .slideY(begin: 0.1, end: 0),
                         ],
                       ),
                     ),
@@ -358,53 +350,6 @@ class _ExamsCard extends StatelessWidget {
             size: 16,
             color: AppColors.textSecondary,
           ),
-        ],
-      ),
-    );
-  }
-}
-
-// ── Lesson Plans card ────────────────────────────────────────────────────────
-
-class _LessonPlansCard extends StatelessWidget {
-  final AppLocalizations l10n;
-  const _LessonPlansCard({required this.l10n});
-
-  @override
-  Widget build(BuildContext context) {
-    return AppCard(
-      color: AppColors.primarySoft,
-      borderColor: Colors.transparent,
-      onTap: () => context.go(AppRoutes.lessonPlans),
-      child: Row(
-        children: [
-          Container(
-            width: 52,
-            height: 52,
-            decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: const Icon(Icons.menu_book_rounded,
-                size: 28, color: AppColors.primary),
-          ),
-          const SizedBox(width: AppTheme.sp16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(l10n.lessonPlans,
-                    style: AppTextStyles.headlineSmall()),
-                const SizedBox(height: 2),
-                Text(
-                  l10n.lessonPlansComingSoon,
-                  style: AppTextStyles.bodySmall(color: AppColors.textSecondary),
-                ),
-              ],
-            ),
-          ),
-          const Icon(Icons.arrow_forward_ios_rounded,
-              size: 16, color: AppColors.textSecondary),
         ],
       ),
     );

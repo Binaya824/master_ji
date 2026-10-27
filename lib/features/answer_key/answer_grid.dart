@@ -49,12 +49,6 @@ class _AnswerGridState extends State<AnswerGrid> {
   void initState() {
     super.initState();
     _answers = Map<int, int>.from(widget.initialAnswers);
-
-    if (!widget.readOnly) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _scrollToFirstUnfilled();
-      });
-    }
   }
 
   @override
@@ -74,23 +68,6 @@ class _AnswerGridState extends State<AnswerGrid> {
     super.dispose();
   }
 
-  void _scrollToFirstUnfilled() {
-    if (!_scrollController.hasClients) return;
-    for (int q = 1; q <= widget.questionCount; q++) {
-      final ans = _answers[q];
-      if (ans == null || ans == 0) {
-        final targetOffset = max(0.0, (q - 1) * _rowHeight);
-        final maxOffset = _scrollController.position.maxScrollExtent;
-        _scrollController.animateTo(
-          min(targetOffset, maxOffset),
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOut,
-        );
-        break;
-      }
-    }
-  }
-
   void _handleOptionTap(int q, int option) {
     if (widget.readOnly) return;
 
@@ -98,36 +75,6 @@ class _AnswerGridState extends State<AnswerGrid> {
       _answers[q] = option;
     });
     widget.onChanged?.call(Map<int, int>.from(_answers));
-
-    // Auto-scroll to next unfilled question
-    int? nextUnfilled;
-    for (int next = q + 1; next <= widget.questionCount; next++) {
-      final ans = _answers[next];
-      if (ans == null || ans == 0) {
-        nextUnfilled = next;
-        break;
-      }
-    }
-
-    if (nextUnfilled == null) {
-      for (int prev = 1; prev < q; prev++) {
-        final ans = _answers[prev];
-        if (ans == null || ans == 0) {
-          nextUnfilled = prev;
-          break;
-        }
-      }
-    }
-
-    if (nextUnfilled != null && _scrollController.hasClients) {
-      final targetOffset = max(0.0, (nextUnfilled - 1) * _rowHeight);
-      final maxOffset = _scrollController.position.maxScrollExtent;
-      _scrollController.animateTo(
-        min(targetOffset, maxOffset),
-        duration: const Duration(milliseconds: 250),
-        curve: Curves.easeOut,
-      );
-    }
   }
 
   void _jumpToQuestion(String text) {
@@ -250,19 +197,41 @@ class _AnswerGridState extends State<AnswerGrid> {
 
   Widget _buildEditRow(int q) {
     final selectedOption = _answers[q] ?? 0;
+    final isAnswered = selectedOption > 0;
 
     return Container(
       height: _rowHeight,
-      padding: const EdgeInsets.symmetric(vertical: 6.0),
+      margin: const EdgeInsets.symmetric(vertical: 2.0),
+      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+      decoration: BoxDecoration(
+        color: isAnswered
+            ? AppColors.primarySoft.withValues(alpha: 0.6)
+            : Colors.transparent,
+        borderRadius: BorderRadius.circular(AppTheme.radiusChip),
+        border: isAnswered
+            ? Border.all(
+                color: AppColors.primary.withValues(alpha: 0.3),
+                width: 1,
+              )
+            : null,
+      ),
       child: Row(
         children: [
-          SizedBox(
-            width: 36,
+          Container(
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              color: isAnswered
+                  ? AppColors.primary.withValues(alpha: 0.15)
+                  : Colors.transparent,
+              shape: BoxShape.circle,
+            ),
+            alignment: Alignment.center,
             child: Text(
               '$q',
               style: AppTextStyles.titleMedium(
-                color: selectedOption > 0
-                    ? AppColors.textPrimary
+                color: isAnswered
+                    ? AppColors.primaryDark
                     : AppColors.textSecondary,
               ),
               textAlign: TextAlign.center,

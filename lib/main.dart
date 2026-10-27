@@ -6,7 +6,7 @@ import '../data/local_repository.dart';
 import '../data/settings_store.dart';
 import '../services/auth_service.dart';
 import '../services/mock_auth_service.dart';
-import '../services/mock_scan_service.dart';
+import '../services/omr_scan_service.dart';
 import '../services/scan_service.dart';
 import 'app/app.dart';
 
@@ -32,9 +32,9 @@ Future<void> main() async {
           create: (_) => LocalRepository(),
         ),
 
-        // Services — swap MockScanService / MockAuthService for real ones here
+        // Services — real OMR scan service using OpenCV pipeline
         Provider<ScanService>(
-          create: (_) => MockScanService(),
+          create: (_) => OmrScanService(),
         ),
         Provider<AuthService>(
           create: (_) => MockAuthService(),
