@@ -117,15 +117,15 @@ class OmrService {
 
     // circles.py outlines EVERY detected bubble in green (thickness 2),
     // then redraws the filled ones thicker below.
-    for (final b in bubbles) {
-      cv.circle(
-        output,
-        cv.Point(b.$1, b.$2),
-        mostCommonRadius,
-        cv.Scalar.fromRgb(0, 255, 0),
-        thickness: 2,
-      );
-    }
+    // for (final b in bubbles) {
+    //   cv.circle(
+    //     output,
+    //     cv.Point(b.$1, b.$2),
+    //     mostCommonRadius,
+    //     cv.Scalar.fromRgb(0, 255, 0),
+    //     thickness: 2,
+    //   );
+    // }
 
     // How "filled" each bubble is: % of its own area that is dark ink.
     // First normalize out uneven illumination: shaded bands and glare
@@ -141,9 +141,8 @@ class OmrService {
     ));
     final bg = cv.morphologyEx(gray, cv.MORPH_CLOSE, bgKernel);
     final normed = cv.divide(gray, bg, scale: 255);
-    final darkMask = cv
-        .threshold(normed, 0, 255, cv.THRESH_BINARY_INV | cv.THRESH_OTSU)
-        .$2;
+    final darkMask =
+        cv.threshold(normed, 0, 255, cv.THRESH_BINARY_INV | cv.THRESH_OTSU).$2;
 
     final filled = <_Bubble, bool>{};
     var filledCount = 0;
@@ -169,7 +168,8 @@ class OmrService {
     // following the sheet's real tilt instead of forcing straight lines.
     final questionOf = <_Bubble, int>{};
     final optionOf = <_Bubble, int>{};
-    final layout = _layoutGrids(bubbles, questionOf, optionOf, output, mostCommonRadius);
+    final layout =
+        _layoutGrids(bubbles, questionOf, optionOf, output, mostCommonRadius);
 
     // Answer key: question_no -> filled option, 0 if none (or more than
     // one) bubble was marked filled for that row.
@@ -764,8 +764,7 @@ class OmrService {
         var cur = 0;
         for (var k = 1; k < axisOrder.length; k++) {
           if (axisValues[axisOrder[k]] - axisValues[axisOrder[k - 1]] >
-              localGapThreshold)
-            cur++;
+              localGapThreshold) cur++;
           ids[axisOrder[k]] = cur;
         }
         final counts = List<int>.filled(cur + 1, 0);
@@ -830,13 +829,13 @@ class OmrService {
           cv.Point(t(bcx + dxx + dyx), t(bcy + dxy + dyy)),
           cv.Point(t(bcx - dxx + dyx), t(bcy - dxy + dyy)),
         ];
-        cv.drawContours(
-          output,
-          cv.VecVecPoint.fromList([boxPts]),
-          0,
-          gridColor,
-          thickness: 3,
-        );
+        // cv.drawContours(
+        //   output,
+        //   cv.VecVecPoint.fromList([boxPts]),
+        //   0,
+        //   gridColor,
+        //   thickness: 3,
+        // );
       }
 
       // Draw a line through each row, following the sheet's own tilt, and
@@ -851,32 +850,32 @@ class OmrService {
           }
         }
         if (rowXs.isEmpty) continue;
-        final leftRx = rowXs.reduce(math.min);
-        final rightRx = rowXs.reduce(math.max);
-        final rowRy = rowYs.reduce((a, b) => a + b) / rowYs.length;
+        // final leftRx = rowXs.reduce(math.min);
+        // final rightRx = rowXs.reduce(math.max);
+        // final rowRy = rowYs.reduce((a, b) => a + b) / rowYs.length;
 
-        final p1x = cx + leftRx * cosA - rowRy * sinA;
-        final p1y = cy + leftRx * sinA + rowRy * cosA;
-        final p2x = cx + rightRx * cosA - rowRy * sinA;
-        final p2y = cy + rightRx * sinA + rowRy * cosA;
+        // final p1x = cx + leftRx * cosA - rowRy * sinA;
+        // final p1y = cy + leftRx * sinA + rowRy * cosA;
+        // final p2x = cx + rightRx * cosA - rowRy * sinA;
+        // final p2y = cy + rightRx * sinA + rowRy * cosA;
 
-        cv.line(
-          output,
-          cv.Point(p1x.toInt(), p1y.toInt()),
-          cv.Point(p2x.toInt(), p2y.toInt()),
-          gridColor,
-          thickness: 1,
-        );
-        cv.putText(
-          output,
-          '${questionOffset + rowId + 1}',
-          cv.Point(p1x.toInt() - 25, p1y.toInt() + 5),
-          cv.FONT_HERSHEY_SIMPLEX,
-          0.5,
-          gridColor,
-          thickness: 2,
-          lineType: cv.LINE_AA,
-        );
+        // cv.line(
+        //   output,
+        //   cv.Point(p1x.toInt(), p1y.toInt()),
+        //   cv.Point(p2x.toInt(), p2y.toInt()),
+        //   gridColor,
+        //   thickness: 1,
+        // );
+        // cv.putText(
+        //   output,
+        //   '${questionOffset + rowId + 1}',
+        //   cv.Point(p1x.toInt() - 25, p1y.toInt() + 5),
+        //   cv.FONT_HERSHEY_SIMPLEX,
+        //   0.5,
+        //   gridColor,
+        //   thickness: 2,
+        //   lineType: cv.LINE_AA,
+        // );
       }
 
       for (final i in indices) {
