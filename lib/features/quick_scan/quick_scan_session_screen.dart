@@ -18,7 +18,6 @@ import 'package:omr_scanner/logic/scoring.dart';
 import 'package:omr_scanner/models/exam.dart';
 import 'package:omr_scanner/models/quick_scan_state.dart';
 import 'package:omr_scanner/services/omr_service.dart';
-import 'package:omr_scanner/services/scan_service.dart';
 import 'package:omr_scanner/services/storage_service.dart';
 import 'package:omr_scanner/theme/app_colors.dart';
 import 'package:omr_scanner/theme/app_text.dart';
@@ -58,9 +57,12 @@ class _QuickScanSessionScreenState extends State<QuickScanSessionScreen> {
     var state = await repo.loadQuickScan();
 
     // Ensure full answer key is loaded from local storage (including zero values)
-    Map<String, int> storedKey = await StorageService.loadAnswerKeyResults() ?? {};
-    if (storedKey.isEmpty && state?.answerKey != null && state!.answerKey!.isNotEmpty) {
-      storedKey = state!.answerKey!.map((k, v) => MapEntry('$k', v));
+    Map<String, int> storedKey =
+        await StorageService.loadAnswerKeyResults() ?? {};
+    if (storedKey.isEmpty &&
+        state?.answerKey != null &&
+        state!.answerKey!.isNotEmpty) {
+      storedKey = state.answerKey!.map((k, v) => MapEntry('$k', v));
     }
 
     final fullKey = <int, int>{};
@@ -74,7 +76,8 @@ class _QuickScanSessionScreenState extends State<QuickScanSessionScreen> {
     });
 
     // Exact length of the answer key json (including zero values)
-    final totalActual = fullKey.isNotEmpty ? fullKey.length : (state?.questionCount ?? 50);
+    final totalActual =
+        fullKey.isNotEmpty ? fullKey.length : (state?.questionCount ?? 50);
 
     if (state != null) {
       state = state.copyWith(
@@ -98,7 +101,8 @@ class _QuickScanSessionScreenState extends State<QuickScanSessionScreen> {
   int get _nextSheetNumber {
     final results = _state?.results ?? [];
     if (results.isEmpty) return 1;
-    return results.map((r) => r.sheetNumber).reduce((a, b) => a > b ? a : b) + 1;
+    return results.map((r) => r.sheetNumber).reduce((a, b) => a > b ? a : b) +
+        1;
   }
 
   Future<void> _handleScan({ImageSource? source}) async {
@@ -111,9 +115,12 @@ class _QuickScanSessionScreenState extends State<QuickScanSessionScreen> {
     }
 
     // Load full answer key json from StorageService or state (including zero values)
-    Map<String, int> storedKey = await StorageService.loadAnswerKeyResults() ?? {};
-    if (storedKey.isEmpty && state?.answerKey != null && state!.answerKey!.isNotEmpty) {
-      storedKey = state!.answerKey!.map((k, v) => MapEntry('$k', v));
+    Map<String, int> storedKey =
+        await StorageService.loadAnswerKeyResults() ?? {};
+    if (storedKey.isEmpty &&
+        state?.answerKey != null &&
+        state!.answerKey!.isNotEmpty) {
+      storedKey = state.answerKey!.map((k, v) => MapEntry('$k', v));
     }
 
     final fullKey = <int, int>{};
@@ -126,13 +133,18 @@ class _QuickScanSessionScreenState extends State<QuickScanSessionScreen> {
       }
     });
 
-    if (storedKey.isEmpty && (state?.answerKey == null || state!.answerKey!.isEmpty)) {
+    if (storedKey.isEmpty &&
+        (state?.answerKey == null || state!.answerKey!.isEmpty)) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please scan or set an answer key first.')),
+        const SnackBar(
+            content: Text('Please scan or set an answer key first.')),
       );
       context.go(AppRoutes.quickScanKey);
       return;
     }
+
+    if (!mounted) return;
 
     final picked = await pickImageFromSource(
       context,
@@ -151,7 +163,9 @@ class _QuickScanSessionScreenState extends State<QuickScanSessionScreen> {
       // Exact length of the answer key json, even though they have zero values
       final totalQuestions = fullKey.isNotEmpty
           ? fullKey.length
-          : (storedKey.isNotEmpty ? storedKey.length : (state?.questionCount ?? 50));
+          : (storedKey.isNotEmpty
+              ? storedKey.length
+              : (state?.questionCount ?? 50));
 
       // Correct answer: first drop all the zero values keys from the output json
       // and compare the rest keys value with answer key find how many matched.
@@ -227,6 +241,7 @@ class _QuickScanSessionScreenState extends State<QuickScanSessionScreen> {
         answerKey: fullKey,
       );
 
+      if (!mounted) return;
       final repo = context.read<LocalRepository>();
       await repo.saveQuickScan(updatedState);
 
@@ -247,7 +262,8 @@ class _QuickScanSessionScreenState extends State<QuickScanSessionScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Failed to process OMR sheet: ${e.toString().replaceAll('Exception: ', '')}'),
+          content: Text(
+              'Failed to process OMR sheet: ${e.toString().replaceAll('Exception: ', '')}'),
           backgroundColor: AppColors.wrong,
           duration: const Duration(seconds: 4),
         ),
@@ -315,6 +331,8 @@ class _QuickScanSessionScreenState extends State<QuickScanSessionScreen> {
     final repo = context.read<LocalRepository>();
     await repo.saveQuickScan(updatedState);
 
+    if (!mounted) return;
+
     final account = context.read<AccountState>();
     await account.decrementFreeScan();
 
@@ -343,7 +361,9 @@ class _QuickScanSessionScreenState extends State<QuickScanSessionScreen> {
       MaterialPageRoute(
         builder: (_) => SessionSummaryScreen(
           results: state.results,
-          questionCount: _totalAnswerKeyQuestions > 0 ? _totalAnswerKeyQuestions : state.questionCount,
+          questionCount: _totalAnswerKeyQuestions > 0
+              ? _totalAnswerKeyQuestions
+              : state.questionCount,
           isQuickScan: true,
         ),
       ),
@@ -374,7 +394,8 @@ class _QuickScanSessionScreenState extends State<QuickScanSessionScreen> {
     }
 
     final state = _state;
-    if (state == null || (state.answerKey == null && _nonZeroAnswerKey.isEmpty)) {
+    if (state == null ||
+        (state.answerKey == null && _nonZeroAnswerKey.isEmpty)) {
       return Scaffold(
         appBar: AppBar(
           title: Text(l10n.quickScan),
@@ -653,7 +674,9 @@ class _QuickScanSessionScreenState extends State<QuickScanSessionScreen> {
     QuickScanState state,
     SheetResult result,
   ) {
-    final totalQ = _totalAnswerKeyQuestions > 0 ? _totalAnswerKeyQuestions : state.questionCount;
+    final totalQ = _totalAnswerKeyQuestions > 0
+        ? _totalAnswerKeyQuestions
+        : state.questionCount;
     final maxMarks = totalQ * state.marksPerCorrect;
 
     return SingleChildScrollView(
@@ -670,14 +693,17 @@ class _QuickScanSessionScreenState extends State<QuickScanSessionScreen> {
                 children: [
                   Row(
                     children: [
-                      const Icon(Icons.image_outlined, size: 20, color: AppColors.primary),
+                      const Icon(Icons.image_outlined,
+                          size: 20, color: AppColors.primary),
                       const SizedBox(width: AppTheme.sp8),
-                      Text('Scanned Sheet Preview', style: AppTextStyles.titleMedium()),
+                      Text('Scanned Sheet Preview',
+                          style: AppTextStyles.titleMedium()),
                       const Spacer(),
                       IconButton(
                         icon: const Icon(Icons.fullscreen_rounded),
                         tooltip: 'View Fullscreen',
-                        onPressed: () => _showImagePreviewDialog(_scannedImageBytes!),
+                        onPressed: () =>
+                            _showImagePreviewDialog(_scannedImageBytes!),
                       ),
                     ],
                   ),
@@ -731,7 +757,8 @@ class _QuickScanSessionScreenState extends State<QuickScanSessionScreen> {
                 const SizedBox(height: AppTheme.sp4),
                 Text(
                   'Total Questions: $totalQ',
-                  style: AppTextStyles.bodySmall(color: AppColors.textSecondary),
+                  style:
+                      AppTextStyles.bodySmall(color: AppColors.textSecondary),
                 ),
                 const SizedBox(height: AppTheme.sp16),
 
@@ -755,7 +782,7 @@ class _QuickScanSessionScreenState extends State<QuickScanSessionScreen> {
                   width: double.infinity,
                   padding: const EdgeInsets.all(AppTheme.sp12),
                   decoration: BoxDecoration(
-                    color: AppColors.primarySoft.withOpacity(0.5),
+                    color: AppColors.primarySoft.withValues(alpha: 0.5),
                     borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
                     border: Border.all(color: AppColors.primarySoft),
                   ),
@@ -764,15 +791,20 @@ class _QuickScanSessionScreenState extends State<QuickScanSessionScreen> {
                     children: [
                       Row(
                         children: [
-                          const Icon(Icons.calculate_outlined, size: 18, color: AppColors.primary),
+                          const Icon(Icons.calculate_outlined,
+                              size: 18, color: AppColors.primary),
                           const SizedBox(width: AppTheme.sp8),
-                          Text('Marks Calculation', style: AppTextStyles.titleMedium(color: AppColors.primary)),
+                          Text('Marks Calculation',
+                              style: AppTextStyles.titleMedium(
+                                  color: AppColors.primary)),
                         ],
                       ),
                       const SizedBox(height: AppTheme.sp8),
                       Text(
                         _calculationExplanation,
-                        style: AppTextStyles.bodySmall(color: AppColors.textPrimary).copyWith(height: 1.5),
+                        style: AppTextStyles.bodySmall(
+                                color: AppColors.textPrimary)
+                            .copyWith(height: 1.5),
                       ),
                     ],
                   ),
@@ -795,7 +827,11 @@ class _QuickScanSessionScreenState extends State<QuickScanSessionScreen> {
                       child: AnswerGrid.review(
                         questionCount: totalQ,
                         studentAnswers: result.answers,
-                        answerKey: _fullAnswerKey.isNotEmpty ? _fullAnswerKey : (_nonZeroAnswerKey.isNotEmpty ? _nonZeroAnswerKey : state.answerKey),
+                        answerKey: _fullAnswerKey.isNotEmpty
+                            ? _fullAnswerKey
+                            : (_nonZeroAnswerKey.isNotEmpty
+                                ? _nonZeroAnswerKey
+                                : state.answerKey),
                       ),
                     ),
                   ],

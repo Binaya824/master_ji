@@ -192,9 +192,7 @@ class AnswerSet {
   Map<String, dynamic> toJson() => {
         'id': id,
         'setLabel': setLabel,
-        'answerKey': answerKey != null
-            ? answerKey!.map((k, v) => MapEntry(k.toString(), v))
-            : null,
+        'answerKey': answerKey?.map((k, v) => MapEntry(k.toString(), v)),
       };
 
   factory AnswerSet.fromJson(Map<String, dynamic> json) => AnswerSet(

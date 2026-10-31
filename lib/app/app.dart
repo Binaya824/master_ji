@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 
-import '../data/account_state.dart';
 import '../data/settings_store.dart';
 import '../l10n/app_localizations.dart';
 import '../theme/app_theme.dart';
@@ -23,7 +22,7 @@ class _MasterJiAppState extends State<MasterJiApp> {
   @override
   void initState() {
     super.initState();
-    _appRouter = AppRouter(context.read<AccountState>());
+    _appRouter = AppRouter();
   }
 
   @override

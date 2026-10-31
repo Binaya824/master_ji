@@ -121,9 +121,9 @@ class _StatusChip extends StatelessWidget {
         padding: const EdgeInsets.symmetric(
             horizontal: AppTheme.sp12, vertical: AppTheme.sp4),
         decoration: BoxDecoration(
-          color: AppColors.accent.withOpacity(0.15),
+          color: AppColors.accent.withValues(alpha: 0.15),
           borderRadius: BorderRadius.circular(AppTheme.radiusChip),
-          border: Border.all(color: AppColors.accent.withOpacity(0.4)),
+          border: Border.all(color: AppColors.accent.withValues(alpha: 0.4)),
         ),
         child: Text(
           '👑 Premium',
@@ -145,9 +145,9 @@ class _StatusChip extends StatelessWidget {
         padding: const EdgeInsets.symmetric(
             horizontal: AppTheme.sp12, vertical: AppTheme.sp4),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
+          color: color.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(AppTheme.radiusChip),
-          border: Border.all(color: color.withOpacity(0.3)),
+          border: Border.all(color: color.withValues(alpha: 0.3)),
         ),
         child: Text(
           '⚡ $left free scans left',
@@ -234,7 +234,7 @@ class _QuickScanCard extends StatelessWidget {
             width: 52,
             height: 52,
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
+              color: Colors.white.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(14),
             ),
             child: const Icon(Icons.document_scanner_rounded,
@@ -250,7 +250,7 @@ class _QuickScanCard extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(l10n.quickScanSubtitle,
                     style: AppTextStyles.bodySmall(
-                        color: Colors.white.withOpacity(0.8))),
+                        color: Colors.white.withValues(alpha: 0.8))),
               ],
             ),
           ),
@@ -323,7 +323,7 @@ class _ExamsCard extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(
-                          color: AppColors.accent.withOpacity(0.15),
+                          color: AppColors.accent.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text('Premium',

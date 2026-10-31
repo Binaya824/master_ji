@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:path_provider/path_provider.dart';
@@ -11,7 +10,7 @@ import '../services/storage_service.dart';
 /// as JSON files. All operations are async and safe to call from UI code.
 ///
 /// File layout:
-///   <documents>/masterji/
+///   `<documents>/masterji/`
 ///     exams.json          – list of all Exams
 ///     sessions.json       – list of all ScanSessions
 ///     quick_scan.json     – current QuickScanState (single file, overwritten)
@@ -163,7 +162,7 @@ class LocalRepository {
 
   // ── Recently used papers (last 3 papers with scan sessions) ─────────────
 
-  Future<List<_RecentPaper>> loadRecentPapers({int limit = 3}) async {
+  Future<List<RecentPaper>> loadRecentPapers({int limit = 3}) async {
     final sessions = await loadAllSessions();
     if (sessions.isEmpty) return [];
 
@@ -172,11 +171,11 @@ class LocalRepository {
 
     // Deduplicate by paperId, keeping most recent
     final seen = <String>{};
-    final recent = <_RecentPaper>[];
+    final recent = <RecentPaper>[];
     for (final s in sessions) {
       if (!seen.contains(s.paperId)) {
         seen.add(s.paperId);
-        recent.add(_RecentPaper(
+        recent.add(RecentPaper(
           paperId: s.paperId,
           section: s.section,
           setId: s.setId,
@@ -190,14 +189,14 @@ class LocalRepository {
   }
 }
 
-class _RecentPaper {
+class RecentPaper {
   final String paperId;
   final String section;
   final String setId;
   final int sheetCount;
   final DateTime lastUsed;
 
-  const _RecentPaper({
+  const RecentPaper({
     required this.paperId,
     required this.section,
     required this.setId,

@@ -264,7 +264,7 @@ class _PaperSettingsScreenState extends State<PaperSettingsScreen> {
                 color: AppColors.surface,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.04),
+                    color: Colors.black.withValues(alpha: 0.04),
                     blurRadius: 10,
                     offset: const Offset(0, -2),
                   ),
@@ -394,7 +394,7 @@ class _PaperSettingsScreenState extends State<PaperSettingsScreen> {
               style: AppTextStyles.bodySmall(),
             ),
             value: _negativeMarking,
-            activeColor: AppColors.primary,
+            activeThumbColor: AppColors.primary,
             onChanged: (val) {
               setState(() {
                 _negativeMarking = val;
@@ -501,7 +501,7 @@ class _PaperSettingsScreenState extends State<PaperSettingsScreen> {
               style: AppTextStyles.bodySmall(),
             ),
             value: _hasSets,
-            activeColor: AppColors.primary,
+            activeThumbColor: AppColors.primary,
             onChanged: (val) {
               setState(() {
                 _hasSets = val;

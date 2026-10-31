@@ -47,7 +47,7 @@ class _SplashScreenState extends State<SplashScreen> {
               width: 100,
               height: 100,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.15),
+                color: Colors.white.withValues(alpha: 0.15),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
@@ -75,7 +75,7 @@ class _SplashScreenState extends State<SplashScreen> {
             const SizedBox(height: AppTheme.sp8),
             Text(
               'ମାଷ୍ଟରଜୀ',
-              style: AppTextStyles.bodyMedium(color: Colors.white.withOpacity(0.8)),
+              style: AppTextStyles.bodyMedium(color: Colors.white.withValues(alpha: 0.8)),
             )
                 .animate(delay: 500.ms)
                 .fadeIn(duration: 400.ms),

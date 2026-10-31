@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
 
-import '../data/account_state.dart';
-import '../data/settings_store.dart';
 import '../features/answer_key/answer_key_screen.dart';
 import '../features/exams/create_exam_wizard.dart';
 import '../features/exams/exam_detail_screen.dart';
@@ -61,10 +58,6 @@ abstract final class AppRoutes {
 }
 
 class AppRouter {
-  final AccountState _accountState;
-
-  AppRouter(this._accountState);
-
   late final GoRouter router = GoRouter(
     initialLocation: AppRoutes.splash,
     debugLogDiagnostics: false,
@@ -224,8 +217,8 @@ class _AppShell extends StatelessWidget {
       body: navigationShell,
       bottomNavigationBar: NavigationBar(
         selectedIndex: navigationShell.currentIndex,
-        onDestinationSelected: (index) =>
-            navigationShell.goBranch(index, initialLocation: index == navigationShell.currentIndex),
+        onDestinationSelected: (index) => navigationShell.goBranch(index,
+            initialLocation: index == navigationShell.currentIndex),
         destinations: _buildDestinations(context),
       ),
     );

@@ -11,7 +11,6 @@ import '../../services/auth_service.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_text.dart';
 import '../../theme/app_theme.dart';
-import '../../widgets/primary_button.dart';
 
 class LoginScreen extends StatefulWidget {
   final bool fromPremiumSheet;
@@ -157,7 +156,7 @@ class _GoogleSignInButton extends StatelessWidget {
     return Material(
       color: Colors.white,
       elevation: 1,
-      shadowColor: Colors.black.withOpacity(0.15),
+      shadowColor: Colors.black.withValues(alpha: 0.15),
       borderRadius: BorderRadius.circular(AppTheme.radiusButton),
       clipBehavior: Clip.antiAlias,
       child: InkWell(

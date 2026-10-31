@@ -189,7 +189,7 @@ class _SubjectCard extends StatelessWidget {
                           width: 38,
                           height: 38,
                           decoration: BoxDecoration(
-                            color: accentColor.withOpacity(0.12),
+                            color: accentColor.withValues(alpha: 0.12),
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Icon(
@@ -229,7 +229,7 @@ class _SubjectCard extends StatelessWidget {
                       child: LinearProgressIndicator(
                         value: progress,
                         minHeight: 6,
-                        backgroundColor: accentColor.withOpacity(0.15),
+                        backgroundColor: accentColor.withValues(alpha: 0.15),
                         valueColor: AlwaysStoppedAnimation<Color>(accentColor),
                       ),
                     ),

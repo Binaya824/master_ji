@@ -1,4 +1,5 @@
 /// Pure scoring functions — no Flutter dependencies, easy to unit-test.
+library;
 
 /// Result of scoring one student's OMR sheet against the answer key.
 class ScoreResult {

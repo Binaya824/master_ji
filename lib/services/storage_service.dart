@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
@@ -107,7 +106,8 @@ class StorageService {
     return null;
   }
 
-  /// Loads the saved answer key as Map<int, int> (question -> answer 1..4) from device local storage.
+  /// Loads the saved answer key as `Map<int, int>` (question -> answer 1..4)
+  /// from device local storage.
   static Future<Map<int, int>?> loadAnswerKeyMap() async {
     final results = await loadAnswerKeyResults();
     if (results == null) return null;

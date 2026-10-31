@@ -8,44 +8,37 @@ import '../theme/app_theme.dart';
 class StatPill extends StatelessWidget {
   final String label;
   final int count;
-  final _PillVariant variant;
+  final _PillVariant _variant;
 
   const StatPill.correct({super.key, required this.count})
       : label = '',
-        variant = _PillVariant.correct;
+        _variant = _PillVariant.correct;
 
   const StatPill.wrong({super.key, required this.count})
       : label = '',
-        variant = _PillVariant.wrong;
+        _variant = _PillVariant.wrong;
 
   const StatPill.skipped({super.key, required this.count})
       : label = '',
-        variant = _PillVariant.skipped;
-
-  const StatPill({
-    super.key,
-    required this.label,
-    required this.count,
-    required this.variant,
-  });
+        _variant = _PillVariant.skipped;
 
   @override
   Widget build(BuildContext context) {
-    final (bg, fg, icon, pillLabel) = switch (variant) {
+    final (bg, fg, icon, pillLabel) = switch (_variant) {
       _PillVariant.correct => (
-          AppColors.correct.withOpacity(0.12),
+          AppColors.correct.withValues(alpha: 0.12),
           AppColors.correct,
           '✓',
           label.isEmpty ? 'Correct' : label,
         ),
       _PillVariant.wrong => (
-          AppColors.wrong.withOpacity(0.12),
+          AppColors.wrong.withValues(alpha: 0.12),
           AppColors.wrong,
           '✗',
           label.isEmpty ? 'Wrong' : label,
         ),
       _PillVariant.skipped => (
-          AppColors.skipped.withOpacity(0.15),
+          AppColors.skipped.withValues(alpha: 0.15),
           AppColors.skipped,
           '–',
           label.isEmpty ? 'Skipped' : label,

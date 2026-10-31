@@ -1,5 +1,3 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -104,6 +102,7 @@ class _QuickScanKeyScreenState extends State<QuickScanKeyScreen> {
         answerKey: Map<int, int>.from(scannedAnswers),
       );
 
+      if (!mounted) return;
       final repo = context.read<LocalRepository>();
       await repo.saveQuickScan(updatedState);
       await StorageService.saveAnswersJson(scannedAnswers, total: qCount);
@@ -325,8 +324,12 @@ class _QuickScanKeyScreenState extends State<QuickScanKeyScreen> {
                           ),
                         ),
                         child: PrimaryButton(
-                          label: isAllFilled ? 'Save and use the key' : l10n.useThisKey,
-                          onPressed: _answers.values.any((v) => v > 0) ? _handleUseKey : null,
+                          label: isAllFilled
+                              ? 'Save and use the key'
+                              : l10n.useThisKey,
+                          onPressed: _answers.values.any((v) => v > 0)
+                              ? _handleUseKey
+                              : null,
                         ),
                       ),
                     ],

@@ -38,7 +38,6 @@ class AnswerKeyScreen extends StatefulWidget {
 class _AnswerKeyScreenState extends State<AnswerKeyScreen> {
   bool _loading = true;
   Exam? _exam;
-  Subject? _subject;
   Paper? _paper;
   AnswerSet? _answerSet;
 
@@ -57,13 +56,11 @@ class _AnswerKeyScreenState extends State<AnswerKeyScreen> {
     if (!mounted) return;
 
     if (exam != null) {
-      Subject? foundSubject;
       Paper? foundPaper;
       AnswerSet? foundSet;
 
       for (final s in exam.subjects) {
         if (s.id == widget.subjectId) {
-          foundSubject = s;
           for (final p in s.papers) {
             if (p.id == widget.paperId) {
               foundPaper = p;
@@ -82,7 +79,6 @@ class _AnswerKeyScreenState extends State<AnswerKeyScreen> {
 
       setState(() {
         _exam = exam;
-        _subject = foundSubject;
         _paper = foundPaper;
         _answerSet = foundSet;
         _loading = false;
@@ -125,8 +121,9 @@ class _AnswerKeyScreenState extends State<AnswerKeyScreen> {
     } else {
       // User cancelled or scan failed, return to previous state
       setState(() {
-        _screenState =
-            _answers.isNotEmpty ? _KeyScreenState.reviewing : _KeyScreenState.initial;
+        _screenState = _answers.isNotEmpty
+            ? _KeyScreenState.reviewing
+            : _KeyScreenState.initial;
       });
     }
   }
@@ -210,7 +207,8 @@ class _AnswerKeyScreenState extends State<AnswerKeyScreen> {
             Text(
               l10n.filledCount(filledCount, totalQuestions),
               style: AppTextStyles.labelMedium(
-                color: isAllFilled ? AppColors.correct : AppColors.textSecondary,
+                color:
+                    isAllFilled ? AppColors.correct : AppColors.textSecondary,
               ),
             ),
           ],
@@ -232,7 +230,8 @@ class _AnswerKeyScreenState extends State<AnswerKeyScreen> {
                       onPressed: _screenState == _KeyScreenState.scanning
                           ? null
                           : _handleScan,
-                      icon: const Icon(Icons.document_scanner_rounded, size: 20),
+                      icon:
+                          const Icon(Icons.document_scanner_rounded, size: 20),
                       label: Text(l10n.scanAnswerKey),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
