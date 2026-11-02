@@ -14,7 +14,8 @@ const String _keyAccessTokenExpiry = 'access_token_expiry'; // ISO8601 string
 const String _keySecretKey = 'secret_key';
 const String _keySecretKeyType = 'secret_key_type';
 const String _keySecretKeyExpiry = 'secret_key_expiry'; // ISO8601 string
-const String _keyDemoScansRemaining = 'demo_scans_remaining'; // stored as string
+const String _keyDemoScansRemaining =
+    'demo_scans_remaining'; // stored as string
 const String _keyMembershipType = 'membership_type';
 const String _keyUserName = 'user_name';
 const String _keyUserMobile = 'user_mobile';
@@ -61,7 +62,7 @@ class AuthService extends ChangeNotifier {
   // - Can be overridden via --dart-define=API_URL=http://your-server-ip:3000/api
   static String get _baseUrl {
     const fromEnv = String.fromEnvironment('API_URL');
-    if (fromEnv.isNotEmpty) return fromEnv;
+    if (fromEnv.isNotEmpty) return '$fromEnv/api';
     if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
       return 'http://10.0.2.2:3000/api';
     }
@@ -236,7 +237,8 @@ class AuthService extends ChangeNotifier {
           )
           .timeout(const Duration(seconds: 15));
 
-      debugPrint('[Auth] Register response (${response.statusCode}): ${response.body}');
+      debugPrint(
+          '[Auth] Register response (${response.statusCode}): ${response.body}');
       final body = _decodeResponse(response);
 
       if (response.statusCode == 200 || response.statusCode == 201) {
@@ -281,7 +283,8 @@ class AuthService extends ChangeNotifier {
           )
           .timeout(const Duration(seconds: 15));
 
-      debugPrint('[Auth] Login response (${response.statusCode}): ${response.body}');
+      debugPrint(
+          '[Auth] Login response (${response.statusCode}): ${response.body}');
       final body = _decodeResponse(response);
 
       if (response.statusCode == 200) {
@@ -351,15 +354,13 @@ class AuthService extends ChangeNotifier {
     final token = _accessToken;
     if (token == null) return;
     try {
-      await http
-          .post(
-            Uri.parse('$_baseUrl/auth/demo-completed'),
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': 'Bearer $token',
-            },
-          )
-          .timeout(const Duration(seconds: 10));
+      await http.post(
+        Uri.parse('$_baseUrl/auth/demo-completed'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      ).timeout(const Duration(seconds: 10));
     } catch (e) {
       debugPrint('[Auth] demo-completed report failed (ignored): $e');
     }
