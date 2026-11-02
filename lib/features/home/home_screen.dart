@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -14,8 +15,34 @@ import '../../widgets/app_card.dart';
 import '../premium/premium_gate.dart';
 import '../premium/premium_sheet.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  DateTime? _lastBackPress;
+
+  void _handleBack(bool didPop, Object? result) {
+    if (didPop) return;
+    final now = DateTime.now();
+    if (_lastBackPress != null &&
+        now.difference(_lastBackPress!) < const Duration(seconds: 2)) {
+      SystemNavigator.pop();
+      return;
+    }
+    _lastBackPress = now;
+    ScaffoldMessenger.of(context)
+      ..clearSnackBars()
+      ..showSnackBar(
+        const SnackBar(
+          content: Text('Press back again to exit'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,84 +50,89 @@ class HomeScreen extends StatelessWidget {
     final account = context.watch<AccountState>();
     final today = DateFormat('d MMM yyyy').format(DateTime.now());
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: RefreshIndicator(
-          onRefresh: () async {},
-          color: AppColors.primary,
-          child: CustomScrollView(
-            slivers: [
-              SliverToBoxAdapter(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // ── Header ─────────────────────────────────────────
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(
-                          AppTheme.sp16, AppTheme.sp24, AppTheme.sp16, 0),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  account.isLoggedIn && account.userName != null
-                                      ? l10n.namaskarName(account.userName!)
-                                      : l10n.namaskar,
-                                  style: AppTextStyles.headlineMedium(),
-                                ),
-                                Text(
-                                  l10n.today(today),
-                                  style: AppTextStyles.bodyMedium(),
-                                ),
-                              ],
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: _handleBack,
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        body: SafeArea(
+          child: RefreshIndicator(
+            onRefresh: () async {},
+            color: AppColors.primary,
+            child: CustomScrollView(
+              slivers: [
+                SliverToBoxAdapter(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // ── Header ─────────────────────────────────────────
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(
+                            AppTheme.sp16, AppTheme.sp24, AppTheme.sp16, 0),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    account.isLoggedIn &&
+                                            account.userName != null
+                                        ? l10n.namaskarName(account.userName!)
+                                        : l10n.namaskar,
+                                    style: AppTextStyles.headlineMedium(),
+                                  ),
+                                  Text(
+                                    l10n.today(today),
+                                    style: AppTextStyles.bodyMedium(),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                          const SizedBox(width: AppTheme.sp8),
-                          _StatusChip(account: account),
-                        ],
-                      ),
-                    ).animate().fadeIn(duration: 400.ms),
+                            const SizedBox(width: AppTheme.sp8),
+                            _StatusChip(account: account),
+                          ],
+                        ),
+                      ).animate().fadeIn(duration: 400.ms),
 
-                    // ── Login banner (logged-out only) ────────────────
-                    if (!account.isLoggedIn) ...[
-                      const SizedBox(height: AppTheme.sp12),
-                      _LoginBanner(l10n: l10n),
+                      // ── Login banner (logged-out only) ────────────────
+                      if (!account.isLoggedIn) ...[
+                        const SizedBox(height: AppTheme.sp12),
+                        _LoginBanner(l10n: l10n),
+                      ],
+
+                      const SizedBox(height: AppTheme.sp24),
+
+                      // ── Hero cards ────────────────────────────────────
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: AppTheme.sp16),
+                        child: Column(
+                          children: [
+                            // Quick Scan card
+                            _QuickScanCard(l10n: l10n)
+                                .animate(delay: 100.ms)
+                                .fadeIn(duration: 350.ms)
+                                .slideY(begin: 0.1, end: 0),
+
+                            const SizedBox(height: AppTheme.sp12),
+
+                            // Exams card
+                            _ExamsCard(l10n: l10n, account: account)
+                                .animate(delay: 180.ms)
+                                .fadeIn(duration: 350.ms)
+                                .slideY(begin: 0.1, end: 0),
+                          ],
+                        ),
+                      ),
+
+                      const SizedBox(height: AppTheme.sp32),
                     ],
-
-                    const SizedBox(height: AppTheme.sp24),
-
-                    // ── Hero cards ────────────────────────────────────
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: AppTheme.sp16),
-                      child: Column(
-                        children: [
-                          // Quick Scan card
-                          _QuickScanCard(l10n: l10n)
-                              .animate(delay: 100.ms)
-                              .fadeIn(duration: 350.ms)
-                              .slideY(begin: 0.1, end: 0),
-
-                          const SizedBox(height: AppTheme.sp12),
-
-                          // Exams card
-                          _ExamsCard(l10n: l10n, account: account)
-                              .animate(delay: 180.ms)
-                              .fadeIn(duration: 350.ms)
-                              .slideY(begin: 0.1, end: 0),
-                        ],
-                      ),
-                    ),
-
-                    const SizedBox(height: AppTheme.sp32),
-                  ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -315,8 +347,7 @@ class _ExamsCard extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Text(l10n.exams,
-                        style: AppTextStyles.headlineSmall()),
+                    Text(l10n.exams, style: AppTextStyles.headlineSmall()),
                     if (!account.canUseExams) ...[
                       const SizedBox(width: AppTheme.sp8),
                       Container(
@@ -355,5 +386,3 @@ class _ExamsCard extends StatelessWidget {
     );
   }
 }
-
-

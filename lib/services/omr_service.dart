@@ -42,7 +42,7 @@ class OmrService {
   /// size.
   static const int workingLongSide = 1280;
 
-  static const double fillThreshold = 0.80;
+  static const double fillThreshold = 0.60;
 
   /// Grid-to-grid gaps (the Q.No. lane) and row/column gaps are both
   /// multiples of bubble pitch (nearest-neighbor spacing) — grid gaps are
@@ -64,7 +64,11 @@ class OmrService {
   /// CRITICAL SECURITY REQUIREMENT:
   /// This script will NOT execute without both a valid Access Token and a valid
   /// Secret Key present locally. Throws [OmrUnauthorizedException] if unauthorized.
-  static Future<OmrResult> process(XFile imageFile, [AuthService? auth]) async {
+  static Future<OmrResult> process(
+    XFile imageFile, [
+    AuthService? auth,
+    Map<String, int>? answerKey,
+  ]) async {
     // 1. Enforce local security check before executing any scanning logic
     await _enforceAuthorization(auth);
 
@@ -141,15 +145,15 @@ class OmrService {
 
     // circles.py outlines EVERY detected bubble in green (thickness 2),
     // then redraws the filled ones thicker below.
-    // for (final b in bubbles) {
-    //   cv.circle(
-    //     output,
-    //     cv.Point(b.$1, b.$2),
-    //     mostCommonRadius,
-    //     cv.Scalar.fromRgb(0, 255, 0),
-    //     thickness: 2,
-    //   );
-    // }
+    for (final b in bubbles) {
+      cv.circle(
+        output,
+        cv.Point(b.$1, b.$2),
+        mostCommonRadius,
+        cv.Scalar.fromRgb(0, 0, 255),
+        thickness: 2,
+      );
+    }
 
     // How "filled" each bubble is: % of its own area that is dark ink.
     // First normalize out uneven illumination: shaded bands and glare
@@ -165,8 +169,29 @@ class OmrService {
     ));
     final bg = cv.morphologyEx(gray, cv.MORPH_CLOSE, bgKernel);
     final normed = cv.divide(gray, bg, scale: 255);
-    final darkMask =
+    final otsuMask =
         cv.threshold(normed, 0, 255, cv.THRESH_BINARY_INV | cv.THRESH_OTSU).$2;
+
+    // Printed option letters inside a bubble (e.g. a circled "A") are thin
+    // glyph strokes, not a solid mark - an opening (erode then dilate) with
+    // a kernel sized well below the bubble radius erases anything that
+    // thin while leaving a real pencil/pen fill (a blob close to the
+    // bubble's own area) intact, so it doesn't inflate the fill ratio.
+    final strokeKernelSize = math.max(3, (mostCommonRadius * 0.22).round());
+    final strokeKernel = cv.getStructuringElement(
+      cv.MORPH_ELLIPSE,
+      (strokeKernelSize, strokeKernelSize),
+    );
+    final darkMask = cv.morphologyEx(otsuMask, cv.MORPH_OPEN, strokeKernel);
+
+    // Group circles into answer grids (3, 4, 5... whatever the sheet has),
+    // following the sheet's real tilt instead of forcing straight lines.
+    // Done before the fill loop below so a provided [answerKey] can be
+    // checked per-bubble while drawing.
+    final questionOf = <_Bubble, int>{};
+    final optionOf = <_Bubble, int>{};
+    final layout =
+        _layoutGrids(bubbles, questionOf, optionOf, output, mostCommonRadius);
 
     final filled = <_Bubble, bool>{};
     var filledCount = 0;
@@ -178,22 +203,19 @@ class OmrService {
 
       if (isFilled) {
         filledCount++;
+        final correctOption = answerKey?['${questionOf[b]}'];
+        final isWrong = correctOption != null &&
+            correctOption > 0 &&
+            correctOption != optionOf[b];
         cv.circle(
           output,
           cv.Point(b.$1, b.$2),
           mostCommonRadius,
-          cv.Scalar.fromRgb(0, 255, 0),
+          isWrong ? cv.Scalar.fromRgb(255, 0, 0) : cv.Scalar.fromRgb(0, 255, 0),
           thickness: 3,
         );
       }
     }
-
-    // Group circles into answer grids (3, 4, 5... whatever the sheet has),
-    // following the sheet's real tilt instead of forcing straight lines.
-    final questionOf = <_Bubble, int>{};
-    final optionOf = <_Bubble, int>{};
-    final layout =
-        _layoutGrids(bubbles, questionOf, optionOf, output, mostCommonRadius);
 
     // Answer key: question_no -> filled option, 0 if none (or more than
     // one) bubble was marked filled for that row.
@@ -236,7 +258,8 @@ class OmrService {
         final demoStr = await secure.read(key: 'demo_scans_remaining');
         // No stored count yet (server never stores demo scans): start at 20.
         int count = int.tryParse(demoStr ?? '') ?? 20;
-        await secure.write(key: 'demo_scans_remaining', value: count.toString());
+        await secure.write(
+            key: 'demo_scans_remaining', value: count.toString());
         if (count > 0) {
           count--;
           await secure.write(
@@ -261,9 +284,10 @@ class OmrService {
   /// validity locally before running the algorithm.
   static Future<OmrResult> processGuarded(
     XFile imageFile,
-    AuthService auth,
-  ) async {
-    return process(imageFile, auth);
+    AuthService auth, [
+    Map<String, int>? answerKey,
+  ]) async {
+    return process(imageFile, auth, answerKey);
   }
 
   /// Enforces that the caller has both a valid, non-expired access token and

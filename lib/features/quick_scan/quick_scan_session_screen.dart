@@ -161,7 +161,11 @@ class _QuickScanSessionScreenState extends State<QuickScanSessionScreen> {
     });
 
     try {
-      final omrResult = await OmrService.processGuarded(picked, auth);
+      final omrResult = await OmrService.processGuarded(
+        picked,
+        auth,
+        storedKey.isNotEmpty ? storedKey : null,
+      );
 
       // Exact length of the answer key json, even though they have zero values
       final totalQuestions = fullKey.isNotEmpty
