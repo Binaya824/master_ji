@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image_picker/image_picker.dart';
 
-import 'package:omr_scanner/services/omr_service.dart';
+import 'package:master_ji/services/omr_service.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -27,14 +27,18 @@ void main() {
     'test6.jpeg': '/tmp/py6.json',
   };
 
-  Future<void> check(String name, String jsonPath, {double maxMismatch = 0}) async {
+  Future<void> check(String name, String jsonPath,
+      {double maxMismatch = 0}) async {
     final xf = XFile('/home/quotus/binaya/OMR Parser/script/$name');
     final r = await OmrService.process(xf);
-    final expected = (jsonDecode(File(jsonPath).readAsStringSync()) as Map<String, dynamic>)
-        .map((k, v) => MapEntry(k, (v as num).toInt()));
+    final expected =
+        (jsonDecode(File(jsonPath).readAsStringSync()) as Map<String, dynamic>)
+            .map((k, v) => MapEntry(k, (v as num).toInt()));
     final mismatches = <String>[];
     for (final e in expected.entries) {
-      if (r.results[e.key] != e.value) mismatches.add('Q${e.key}: dart=${r.results[e.key]} py=${e.value}');
+      if (r.results[e.key] != e.value) {
+        mismatches.add('Q${e.key}: dart=${r.results[e.key]} py=${e.value}');
+      }
     }
     final fraction = mismatches.length / expected.length;
     if (fraction > maxMismatch) {
@@ -44,7 +48,8 @@ void main() {
   }
 
   for (final entry in exact.entries) {
-    test('answer-key parity on ${entry.key}', () => check(entry.key, entry.value));
+    test('answer-key parity on ${entry.key}',
+        () => check(entry.key, entry.value));
   }
   for (final entry in tolerant.entries) {
     test('answer-key parity (tolerated OpenCV-version drift) on ${entry.key}',

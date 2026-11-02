@@ -5,17 +5,17 @@ import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import 'package:omr_scanner/app/router.dart';
-import 'package:omr_scanner/data/account_state.dart';
-import 'package:omr_scanner/data/settings_store.dart';
-import 'package:omr_scanner/features/premium/premium_sheet.dart';
-import 'package:omr_scanner/features/profile/debug_section.dart';
-import 'package:omr_scanner/l10n/app_localizations.dart';
-import 'package:omr_scanner/theme/app_colors.dart';
-import 'package:omr_scanner/theme/app_text.dart';
-import 'package:omr_scanner/theme/app_theme.dart';
-import 'package:omr_scanner/widgets/app_card.dart';
-import 'package:omr_scanner/widgets/primary_button.dart';
+import 'package:master_ji/app/router.dart';
+import 'package:master_ji/data/account_state.dart';
+import 'package:master_ji/data/settings_store.dart';
+import 'package:master_ji/features/premium/premium_sheet.dart';
+import 'package:master_ji/features/profile/debug_section.dart';
+import 'package:master_ji/l10n/app_localizations.dart';
+import 'package:master_ji/theme/app_colors.dart';
+import 'package:master_ji/theme/app_text.dart';
+import 'package:master_ji/theme/app_theme.dart';
+import 'package:master_ji/widgets/app_card.dart';
+import 'package:master_ji/widgets/primary_button.dart';
 
 /// Profile screen displaying user account details, subscription tier,
 /// language toggle, help & share links, and developer debug panel.
@@ -73,7 +73,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                     const SizedBox(height: AppTheme.sp16),
                     PrimaryButton(
-                      label: l10n.continueWithGoogle,
+                      label: 'Login / Register',
                       icon: const Icon(Icons.login_rounded, size: 18),
                       onPressed: () => context.push(AppRoutes.login),
                     ),
@@ -96,7 +96,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 account.userName ?? '',
                                 style: AppTextStyles.headlineSmall(),
                               ),
-                              if (account.userEmail != null &&
+                              if (account.userMobile != null &&
+                                  account.userMobile!.isNotEmpty)
+                                Text(
+                                  account.userMobile!,
+                                  style: AppTextStyles.bodyMedium(),
+                                )
+                              else if (account.userEmail != null &&
                                   account.userEmail!.isNotEmpty)
                                 Text(
                                   account.userEmail!,
@@ -137,7 +143,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                         ),
                         TextButton(
-                          onPressed: () => _showEditSchoolSheet(context, account),
+                          onPressed: () =>
+                              _showEditSchoolSheet(context, account),
                           child: Text(l10n.editSchool),
                         ),
                       ],
@@ -281,19 +288,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ],
 
             // ── Log Out Button ──────────────────────────────────────────────
-            if (account.isLoggedIn)
-              Center(
-                child: TextButton(
-                  onPressed: () => _handleLogout(context, account, l10n),
-                  style: TextButton.styleFrom(
-                    foregroundColor: AppColors.wrong,
-                  ),
-                  child: Text(
-                    l10n.logOut,
-                    style: AppTextStyles.titleMedium(color: AppColors.wrong),
-                  ),
-                ),
-              ),
+            // Intentionally removed: there is no manual logout. The session
+            // ends automatically after the 5-day access token expiry.
 
             const SizedBox(height: AppTheme.sp32),
           ],
@@ -360,36 +356,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Future<void> _handleLogout(
-    BuildContext context,
-    AccountState account,
-    AppLocalizations l10n,
-  ) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogCtx) => AlertDialog(
-        title: Text(l10n.logOut),
-        content: Text(l10n.logOutConfirm),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogCtx).pop(false),
-            child: Text(l10n.cancel),
-          ),
-          TextButton(
-            style: TextButton.styleFrom(foregroundColor: AppColors.wrong),
-            onPressed: () => Navigator.of(dialogCtx).pop(true),
-            child: Text(l10n.logOut),
-          ),
-        ],
-      ),
-    );
-
-    if (confirmed == true) {
-      await account.logout();
-      if (mounted) setState(() {});
-    }
-  }
-
   Future<void> _launchExternalUrl(String url) async {
     final uri = Uri.parse(url);
     if (await canLaunchUrl(uri)) {
@@ -407,9 +373,8 @@ class _UserAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final initials = name.trim().isNotEmpty
-        ? name.trim()[0].toUpperCase()
-        : 'T';
+    final initials =
+        name.trim().isNotEmpty ? name.trim()[0].toUpperCase() : 'T';
 
     return CircleAvatar(
       radius: 28,

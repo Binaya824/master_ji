@@ -7,25 +7,27 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
-import 'package:omr_scanner/app/router.dart';
-import 'package:omr_scanner/data/account_state.dart';
-import 'package:omr_scanner/data/local_repository.dart';
-import 'package:omr_scanner/features/answer_key/answer_grid.dart';
-import 'package:omr_scanner/features/premium/premium_sheet.dart';
-import 'package:omr_scanner/features/scan/session_summary_screen.dart';
-import 'package:omr_scanner/l10n/app_localizations.dart';
-import 'package:omr_scanner/logic/scoring.dart';
-import 'package:omr_scanner/models/exam.dart';
-import 'package:omr_scanner/models/quick_scan_state.dart';
-import 'package:omr_scanner/services/omr_service.dart';
-import 'package:omr_scanner/services/storage_service.dart';
-import 'package:omr_scanner/theme/app_colors.dart';
-import 'package:omr_scanner/theme/app_text.dart';
-import 'package:omr_scanner/theme/app_theme.dart';
-import 'package:omr_scanner/widgets/app_card.dart';
-import 'package:omr_scanner/widgets/image_source_sheet.dart';
-import 'package:omr_scanner/widgets/primary_button.dart';
-import 'package:omr_scanner/widgets/stat_pill.dart';
+import 'package:master_ji/app/router.dart';
+import 'package:master_ji/data/account_state.dart';
+import 'package:master_ji/data/local_repository.dart';
+import 'package:master_ji/features/answer_key/answer_grid.dart';
+import 'package:master_ji/features/premium/premium_sheet.dart';
+import 'package:master_ji/features/scan/session_summary_screen.dart';
+import 'package:master_ji/l10n/app_localizations.dart';
+import 'package:master_ji/logic/scoring.dart';
+import 'package:master_ji/models/exam.dart';
+import 'package:master_ji/models/quick_scan_state.dart';
+import 'package:master_ji/services/omr_service.dart';
+import 'package:master_ji/features/premium/premium_gate.dart';
+import 'package:master_ji/services/auth_service.dart';
+import 'package:master_ji/services/storage_service.dart';
+import 'package:master_ji/theme/app_colors.dart';
+import 'package:master_ji/theme/app_text.dart';
+import 'package:master_ji/theme/app_theme.dart';
+import 'package:master_ji/widgets/app_card.dart';
+import 'package:master_ji/widgets/image_source_sheet.dart';
+import 'package:master_ji/widgets/primary_button.dart';
+import 'package:master_ji/widgets/stat_pill.dart';
 
 /// Screen for scanning student OMR sheets during a Quick Scan session.
 class QuickScanSessionScreen extends StatefulWidget {
@@ -146,6 +148,7 @@ class _QuickScanSessionScreenState extends State<QuickScanSessionScreen> {
 
     if (!mounted) return;
 
+    final auth = context.read<AuthService>();
     final picked = await pickImageFromSource(
       context,
       directSource: source,
@@ -158,7 +161,7 @@ class _QuickScanSessionScreenState extends State<QuickScanSessionScreen> {
     });
 
     try {
-      final omrResult = await OmrService.process(picked);
+      final omrResult = await OmrService.processGuarded(picked, auth);
 
       // Exact length of the answer key json, even though they have zero values
       final totalQuestions = fullKey.isNotEmpty
@@ -260,14 +263,7 @@ class _QuickScanSessionScreenState extends State<QuickScanSessionScreen> {
     } catch (e) {
       debugPrint('Error scanning OMR sheet: $e');
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-              'Failed to process OMR sheet: ${e.toString().replaceAll('Exception: ', '')}'),
-          backgroundColor: AppColors.wrong,
-          duration: const Duration(seconds: 4),
-        ),
-      );
+      await PremiumGate.handleScanBlock(context, e);
       setState(() {
         _scanning = false;
       });

@@ -10,6 +10,7 @@ import '../features/exams/subject_detail_screen.dart';
 import '../features/home/home_screen.dart';
 import '../features/onboarding/language_screen.dart';
 import '../features/onboarding/login_screen.dart';
+import '../features/onboarding/register_screen.dart';
 import '../features/onboarding/splash_screen.dart';
 import '../features/profile/about_screen.dart';
 import '../features/profile/profile_screen.dart';
@@ -24,6 +25,7 @@ abstract final class AppRoutes {
   static const splash = '/';
   static const language = '/onboarding/language';
   static const login = '/onboarding/login';
+  static const register = '/onboarding/register';
   static const home = '/home';
   static const exams = '/home/exams';
   static const lessonPlans = '/home/lesson-plans';
@@ -79,6 +81,10 @@ class AppRouter {
           final fromPremium = state.uri.queryParameters['from'] == 'premium';
           return LoginScreen(fromPremiumSheet: fromPremium);
         },
+      ),
+      GoRoute(
+        path: AppRoutes.register,
+        builder: (context, state) => const RegisterScreen(),
       ),
 
       // ── Main Shell (bottom nav) ──────────────────────────────────────────

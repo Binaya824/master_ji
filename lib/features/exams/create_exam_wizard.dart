@@ -4,15 +4,15 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 
-import 'package:omr_scanner/app/router.dart';
-import 'package:omr_scanner/data/local_repository.dart';
-import 'package:omr_scanner/l10n/app_localizations.dart';
-import 'package:omr_scanner/models/exam.dart';
-import 'package:omr_scanner/theme/app_colors.dart';
-import 'package:omr_scanner/theme/app_text.dart';
-import 'package:omr_scanner/theme/app_theme.dart';
-import 'package:omr_scanner/widgets/app_card.dart';
-import 'package:omr_scanner/widgets/primary_button.dart';
+import 'package:master_ji/app/router.dart';
+import 'package:master_ji/data/local_repository.dart';
+import 'package:master_ji/l10n/app_localizations.dart';
+import 'package:master_ji/models/exam.dart';
+import 'package:master_ji/theme/app_colors.dart';
+import 'package:master_ji/theme/app_text.dart';
+import 'package:master_ji/theme/app_theme.dart';
+import 'package:master_ji/widgets/app_card.dart';
+import 'package:master_ji/widgets/primary_button.dart';
 
 /// 3-step wizard for creating an exam:
 /// Step 1: Exam Name
@@ -171,9 +171,7 @@ class _CreateExamWizardState extends State<CreateExamWizard> {
                   size: 56,
                   color: Colors.white,
                 ),
-              )
-                  .animate()
-                  .scale(
+              ).animate().scale(
                     begin: const Offset(0.5, 0.5),
                     end: const Offset(1.0, 1.0),
                     duration: 400.ms,
@@ -183,9 +181,7 @@ class _CreateExamWizardState extends State<CreateExamWizard> {
               Text(
                 l10n.successExamCreated,
                 style: AppTextStyles.headlineMedium(),
-              )
-                  .animate()
-                  .fadeIn(duration: 300.ms, delay: 200.ms),
+              ).animate().fadeIn(duration: 300.ms, delay: 200.ms),
             ],
           ),
         ),

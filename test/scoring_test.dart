@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:omr_scanner/logic/scoring.dart';
+import 'package:master_ji/logic/scoring.dart';
 
 void main() {
   group('score()', () {
@@ -76,7 +76,8 @@ void main() {
         negativeMarking: true,
         negativeValue: 1.0,
       );
-      expect(result.marks, 0.0); // no correct, 5 wrong → 0*1 - 5*1 = -5 → clamped to 0
+      expect(result.marks,
+          0.0); // no correct, 5 wrong → 0*1 - 5*1 = -5 → clamped to 0
     });
 
     test('marks per correct = 2', () {
@@ -134,6 +135,7 @@ void main() {
     test('trailing zero trimmed', () => expect(formatMarks(41.50), '41.5'));
     test('zero', () => expect(formatMarks(0.0), '0'));
     test('0.25', () => expect(formatMarks(0.25), '0.25'));
-    test('negative clamped to 0 by score()', () => expect(formatMarks(0.0), '0'));
+    test('negative clamped to 0 by score()',
+        () => expect(formatMarks(0.0), '0'));
   });
 }

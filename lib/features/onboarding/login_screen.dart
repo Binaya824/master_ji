@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../app/router.dart';
-import '../../data/account_state.dart';
 import '../../data/settings_store.dart';
-import '../../l10n/app_localizations.dart';
 import '../../services/auth_service.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_text.dart';
@@ -22,22 +21,49 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  bool _loading = false;
+  final _formKey = GlobalKey<FormState>();
+  final _mobileController = TextEditingController();
+  final _passwordController = TextEditingController();
 
-  Future<void> _signIn() async {
-    setState(() => _loading = true);
+  bool _loading = false;
+  bool _passwordVisible = false;
+  String? _errorMessage;
+
+  @override
+  void dispose() {
+    _mobileController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _login() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() {
+      _loading = true;
+      _errorMessage = null;
+    });
+
     try {
       final auth = context.read<AuthService>();
-      final user = await auth.signInWithGoogle();
+      final error = await auth.login(
+        mobile: _mobileController.text.trim(),
+        password: _passwordController.text,
+      );
+
       if (!mounted) return;
-      if (user != null) {
-        await context.read<AccountState>().login(
-              name: user.name,
-              email: user.email,
-            );
-        if (!mounted) return;
-        await context.read<SettingsStore>().setOnboardingDone();
-        if (!mounted) return;
+
+      if (error != null) {
+        setState(() => _errorMessage = error);
+        return;
+      }
+
+      // Mark onboarding done and navigate home.
+      await context.read<SettingsStore>().setOnboardingDone();
+      if (!mounted) return;
+      if (widget.fromPremiumSheet && context.canPop()) {
+        context.pop();
+      } else {
         context.go(AppRoutes.home);
       }
     } finally {
@@ -45,212 +71,195 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  Future<void> _skip() async {
-    await context.read<SettingsStore>().setOnboardingDone();
-    if (!mounted) return;
-    context.go(AppRoutes.home);
-  }
-
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: AppTheme.sp24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const Spacer(flex: 2),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const SizedBox(height: AppTheme.sp32),
 
-              // Logo
-              Center(
-                child: Container(
-                  width: 88,
-                  height: 88,
-                  decoration: BoxDecoration(
-                    color: AppColors.primarySoft,
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.document_scanner_rounded,
-                    size: 44,
-                    color: AppColors.primary,
-                  ),
-                ),
-              )
-                  .animate()
-                  .scale(
-                    begin: const Offset(0.5, 0.5),
-                    duration: 500.ms,
-                    curve: Curves.easeOutBack,
-                  )
-                  .fadeIn(duration: 400.ms),
-
-              const SizedBox(height: AppTheme.sp24),
-
-              Text(
-                'MasterJi',
-                style: AppTextStyles.headlineLarge(),
-                textAlign: TextAlign.center,
-              ).animate(delay: 150.ms).fadeIn(duration: 400.ms),
-
-              const SizedBox(height: AppTheme.sp8),
-              Text(
-                l10n.checkOMRInSeconds,
-                style: AppTextStyles.bodyLarge(color: AppColors.textSecondary),
-                textAlign: TextAlign.center,
-              ).animate(delay: 250.ms).fadeIn(duration: 400.ms),
-
-              const Spacer(flex: 2),
-
-              // Google button
-              _GoogleSignInButton(
-                label: l10n.continueWithGoogle,
-                loading: _loading,
-                onPressed: _signIn,
-              ).animate(delay: 400.ms).fadeIn(duration: 400.ms).slideY(begin: 0.2, end: 0),
-
-              const SizedBox(height: AppTheme.sp16),
-
-              // Skip
-              Column(
-                children: [
-                  TextButton(
-                    onPressed: _loading ? null : _skip,
-                    child: Text(l10n.skipForNow),
-                  ),
-                  const SizedBox(height: AppTheme.sp4),
-                  Text(
-                    l10n.youGet20FreeScans,
-                    style: AppTextStyles.bodySmall(),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ).animate(delay: 500.ms).fadeIn(duration: 400.ms),
-
-              const SizedBox(height: AppTheme.sp32),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _GoogleSignInButton extends StatelessWidget {
-  final String label;
-  final bool loading;
-  final VoidCallback onPressed;
-
-  const _GoogleSignInButton({
-    required this.label,
-    required this.loading,
-    required this.onPressed,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.white,
-      elevation: 1,
-      shadowColor: Colors.black.withValues(alpha: 0.15),
-      borderRadius: BorderRadius.circular(AppTheme.radiusButton),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: loading ? null : onPressed,
-        child: Container(
-          height: AppTheme.minTouchTarget,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(AppTheme.radiusButton),
-            border: Border.all(color: const Color(0xFFDDE3EA), width: 1),
-          ),
-          child: loading
-              ? const Center(
-                  child: SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor:
-                          AlwaysStoppedAnimation(AppColors.textSecondary),
+                // ── Logo ────────────────────────────────────────────────────
+                Center(
+                  child: Container(
+                    width: 88,
+                    height: 88,
+                    decoration: const BoxDecoration(
+                      color: AppColors.primarySoft,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.document_scanner_rounded,
+                      size: 44,
+                      color: AppColors.primary,
                     ),
                   ),
                 )
-              : Row(
+                    .animate()
+                    .scale(
+                      begin: const Offset(0.5, 0.5),
+                      duration: 500.ms,
+                      curve: Curves.easeOutBack,
+                    )
+                    .fadeIn(duration: 400.ms),
+
+                const SizedBox(height: AppTheme.sp24),
+
+                Text(
+                  'MasterJi',
+                  style: AppTextStyles.headlineLarge(),
+                  textAlign: TextAlign.center,
+                ).animate(delay: 150.ms).fadeIn(duration: 400.ms),
+
+                const SizedBox(height: AppTheme.sp8),
+
+                Text(
+                  'Sign in to your account',
+                  style: AppTextStyles.bodyLarge(color: AppColors.textSecondary),
+                  textAlign: TextAlign.center,
+                ).animate(delay: 250.ms).fadeIn(duration: 400.ms),
+
+                const SizedBox(height: AppTheme.sp32),
+
+                // ── Error banner ─────────────────────────────────────────────
+                if (_errorMessage != null) ...[
+                  Container(
+                    padding: const EdgeInsets.all(AppTheme.sp12),
+                    decoration: BoxDecoration(
+                      color: AppColors.wrong.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+                      border: Border.all(
+                        color: AppColors.wrong.withValues(alpha: 0.4),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.error_outline,
+                            color: AppColors.wrong, size: 18),
+                        const SizedBox(width: AppTheme.sp8),
+                        Expanded(
+                          child: Text(
+                            _errorMessage!,
+                            style: AppTextStyles.bodySmall(
+                                color: AppColors.wrong),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: AppTheme.sp16),
+                ],
+
+                // ── Mobile field ─────────────────────────────────────────────
+                TextFormField(
+                  controller: _mobileController,
+                  keyboardType: TextInputType.phone,
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  textInputAction: TextInputAction.next,
+                  decoration: const InputDecoration(
+                    labelText: 'Mobile Number',
+                    hintText: '10-digit mobile number',
+                    prefixIcon: Icon(Icons.phone_outlined),
+                  ),
+                  validator: (v) {
+                    if (v == null || v.trim().isEmpty) {
+                      return 'Please enter your mobile number.';
+                    }
+                    if (v.trim().length < 10) {
+                      return 'Enter a valid mobile number.';
+                    }
+                    return null;
+                  },
+                ).animate(delay: 350.ms).fadeIn(duration: 400.ms).slideY(begin: 0.1, end: 0),
+
+                const SizedBox(height: AppTheme.sp16),
+
+                // ── Password field ───────────────────────────────────────────
+                TextFormField(
+                  controller: _passwordController,
+                  obscureText: !_passwordVisible,
+                  textInputAction: TextInputAction.done,
+                  onFieldSubmitted: (_) => _login(),
+                  decoration: InputDecoration(
+                    labelText: 'Password',
+                    hintText: 'Enter your password',
+                    prefixIcon: const Icon(Icons.lock_outline),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _passwordVisible
+                            ? Icons.visibility_off_outlined
+                            : Icons.visibility_outlined,
+                      ),
+                      onPressed: () =>
+                          setState(() => _passwordVisible = !_passwordVisible),
+                    ),
+                  ),
+                  validator: (v) {
+                    if (v == null || v.isEmpty) {
+                      return 'Please enter your password.';
+                    }
+                    return null;
+                  },
+                ).animate(delay: 400.ms).fadeIn(duration: 400.ms).slideY(begin: 0.1, end: 0),
+
+                const SizedBox(height: AppTheme.sp24),
+
+                // ── Login button ─────────────────────────────────────────────
+                ElevatedButton(
+                  onPressed: _loading ? null : _login,
+                  child: _loading
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor:
+                                AlwaysStoppedAnimation(Colors.white),
+                          ),
+                        )
+                      : const Text('Login'),
+                ).animate(delay: 450.ms).fadeIn(duration: 400.ms).slideY(begin: 0.2, end: 0),
+
+                const SizedBox(height: AppTheme.sp16),
+
+                // ── Register link ────────────────────────────────────────────
+                Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    // Google G logo (simplified coloured version)
-                    _GoogleLogo(),
-                    const SizedBox(width: AppTheme.sp12),
                     Text(
-                      label,
-                      style: AppTextStyles.titleMedium(),
+                      "Don't have an account? ",
+                      style: AppTextStyles.bodySmall(),
+                    ),
+                    TextButton(
+                      onPressed: _loading
+                          ? null
+                          : () => context.push(AppRoutes.register),
+                      style: TextButton.styleFrom(
+                        padding: EdgeInsets.zero,
+                        minimumSize: Size.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                      child: Text(
+                        'Register',
+                        style: AppTextStyles.bodySmall(
+                            color: AppColors.primary),
+                      ),
                     ),
                   ],
-                ),
+                ).animate(delay: 500.ms).fadeIn(duration: 400.ms),
+
+                const SizedBox(height: AppTheme.sp32),
+              ],
+            ),
+          ),
         ),
       ),
     );
   }
-}
-
-class _GoogleLogo extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 20,
-      height: 20,
-      child: CustomPaint(painter: _GoogleLogoPainter()),
-    );
-  }
-}
-
-/// Simplified Google "G" logo using CustomPaint.
-class _GoogleLogoPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width / 2, size.height / 2);
-    final radius = size.width / 2;
-
-    final paint = Paint()..style = PaintingStyle.fill;
-
-    // Draw the four coloured arcs of the "G"
-    // Blue top-right
-    paint.color = const Color(0xFF4285F4);
-    canvas.drawArc(Rect.fromCircle(center: center, radius: radius),
-        -1.57, 1.57, true, paint);
-
-    // Red top-left
-    paint.color = const Color(0xFFEA4335);
-    canvas.drawArc(Rect.fromCircle(center: center, radius: radius),
-        -3.14, 1.57, true, paint);
-
-    // Yellow bottom-left
-    paint.color = const Color(0xFFFBBC04);
-    canvas.drawArc(Rect.fromCircle(center: center, radius: radius),
-        1.57, 0.79, true, paint);
-
-    // Green bottom-right
-    paint.color = const Color(0xFF34A853);
-    canvas.drawArc(Rect.fromCircle(center: center, radius: radius),
-        2.36, 0.79, true, paint);
-
-    // White inner circle
-    paint.color = Colors.white;
-    canvas.drawCircle(center, radius * 0.55, paint);
-
-    // Blue right bar of the G
-    paint.color = const Color(0xFF4285F4);
-    canvas.drawRect(
-      Rect.fromLTWH(size.width * 0.5, size.height * 0.4,
-          size.width * 0.5, size.height * 0.2),
-      paint,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

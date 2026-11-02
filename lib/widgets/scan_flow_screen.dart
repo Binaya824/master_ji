@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../models/omr_result.dart';
+import '../services/auth_service.dart';
 import '../services/omr_service.dart';
 import 'image_source_sheet.dart';
 
@@ -33,6 +35,7 @@ class _ScanFlowScreenState extends State<ScanFlowScreen> {
   String? _error;
 
   Future<void> _pickAndProcess() async {
+    final auth = context.read<AuthService>();
     final file = await pickImageFromSource(context);
     if (file == null) return;
 
@@ -42,7 +45,7 @@ class _ScanFlowScreenState extends State<ScanFlowScreen> {
     });
 
     try {
-      final result = await OmrService.process(file);
+      final result = await OmrService.processGuarded(file, auth);
       await widget.onResult?.call(result);
       setState(() {
         _result = result;
@@ -50,7 +53,7 @@ class _ScanFlowScreenState extends State<ScanFlowScreen> {
       });
     } catch (e) {
       setState(() {
-        _error = 'Failed to process image: $e';
+        _error = 'Failed to process image: ${e.toString().replaceAll('Exception: ', '')}';
         _loading = false;
       });
     }

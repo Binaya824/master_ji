@@ -2,16 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-import 'package:omr_scanner/app/router.dart';
-import 'package:omr_scanner/data/local_repository.dart';
-import 'package:omr_scanner/l10n/app_localizations.dart';
-import 'package:omr_scanner/logic/scoring.dart';
-import 'package:omr_scanner/models/quick_scan_state.dart';
-import 'package:omr_scanner/theme/app_colors.dart';
-import 'package:omr_scanner/theme/app_text.dart';
-import 'package:omr_scanner/theme/app_theme.dart';
-import 'package:omr_scanner/widgets/app_card.dart';
-import 'package:omr_scanner/widgets/primary_button.dart';
+import 'package:master_ji/app/router.dart';
+import 'package:master_ji/data/local_repository.dart';
+import 'package:master_ji/l10n/app_localizations.dart';
+import 'package:master_ji/logic/scoring.dart';
+import 'package:master_ji/models/quick_scan_state.dart';
+import 'package:master_ji/theme/app_colors.dart';
+import 'package:master_ji/theme/app_text.dart';
+import 'package:master_ji/theme/app_theme.dart';
+import 'package:master_ji/widgets/app_card.dart';
+import 'package:master_ji/widgets/primary_button.dart';
 
 /// Screen for configuring Quick Scan parameters (question count, marks, negative marking).
 class QuickScanSetupScreen extends StatefulWidget {
@@ -148,10 +148,10 @@ class _QuickScanSetupScreenState extends State<QuickScanSetupScreen> {
       marksPerCorrect: marks,
       negativeMarking: negMarking,
       negativeValue: negVal,
-      answerKey: existing?.answerKey != null &&
-              existing!.answerKey!.length == count
-          ? existing.answerKey
-          : null,
+      answerKey:
+          existing?.answerKey != null && existing!.answerKey!.length == count
+              ? existing.answerKey
+              : null,
       results: const [],
     );
     await repo.saveQuickScan(newState);

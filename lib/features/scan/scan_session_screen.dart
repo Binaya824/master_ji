@@ -3,18 +3,18 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-import 'package:omr_scanner/app/router.dart';
-import 'package:omr_scanner/data/local_repository.dart';
-import 'package:omr_scanner/features/scan/result_card.dart';
-import 'package:omr_scanner/features/scan/session_summary_screen.dart';
-import 'package:omr_scanner/l10n/app_localizations.dart';
-import 'package:omr_scanner/logic/scoring.dart';
-import 'package:omr_scanner/models/exam.dart';
-import 'package:omr_scanner/services/scan_service.dart';
-import 'package:omr_scanner/theme/app_colors.dart';
-import 'package:omr_scanner/theme/app_text.dart';
-import 'package:omr_scanner/theme/app_theme.dart';
-import 'package:omr_scanner/widgets/empty_state.dart';
+import 'package:master_ji/app/router.dart';
+import 'package:master_ji/data/local_repository.dart';
+import 'package:master_ji/features/scan/result_card.dart';
+import 'package:master_ji/features/scan/session_summary_screen.dart';
+import 'package:master_ji/l10n/app_localizations.dart';
+import 'package:master_ji/logic/scoring.dart';
+import 'package:master_ji/models/exam.dart';
+import 'package:master_ji/services/scan_service.dart';
+import 'package:master_ji/theme/app_colors.dart';
+import 'package:master_ji/theme/app_text.dart';
+import 'package:master_ji/theme/app_theme.dart';
+import 'package:master_ji/widgets/empty_state.dart';
 
 /// Screen for running an active OMR scan session on an exam paper.
 class ScanSessionScreen extends StatefulWidget {
@@ -79,7 +79,8 @@ class _ScanSessionScreenState extends State<ScanSessionScreen> {
       try {
         foundSubject =
             exam.subjects.firstWhere((s) => s.id == widget.subjectId);
-        foundPaper = foundSubject.papers.firstWhere((p) => p.id == widget.paperId);
+        foundPaper =
+            foundSubject.papers.firstWhere((p) => p.id == widget.paperId);
       } catch (_) {
         foundSubject = null;
         foundPaper = null;
@@ -472,7 +473,8 @@ class _ScanSessionScreenState extends State<ScanSessionScreen> {
                 size: 40,
               ),
             )
-                .animate(onPlay: (controller) => controller.repeat(reverse: true))
+                .animate(
+                    onPlay: (controller) => controller.repeat(reverse: true))
                 .scale(
                   begin: const Offset(1.0, 1.0),
                   end: const Offset(1.06, 1.06),

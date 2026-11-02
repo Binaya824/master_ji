@@ -1,10 +1,26 @@
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:opencv_dart/opencv_dart.dart' as cv;
 
 import '../models/omr_result.dart';
+import 'auth_service.dart';
+
+/// Exception thrown whenever OmrService is invoked without a valid access token
+/// or secret key.
+class OmrUnauthorizedException implements Exception {
+  final String message;
+
+  /// The underlying [AuthGuardReason] (or closest equivalent) so callers can
+  /// decide whether to show a premium upsell, a login prompt, or plain error.
+  final AuthGuardReason? reason;
+  const OmrUnauthorizedException(this.message, [this.reason]);
+
+  @override
+  String toString() => 'Unauthorized: $message';
+}
 
 typedef _Bubble = (int x, int y, int r);
 
@@ -43,7 +59,15 @@ class OmrService {
   /// the tight threshold never merges real rows.
   static const double localGapFactor = 0.35;
 
-  static Future<OmrResult> process(XFile imageFile) async {
+  /// Main OMR scanning pipeline.
+  ///
+  /// CRITICAL SECURITY REQUIREMENT:
+  /// This script will NOT execute without both a valid Access Token and a valid
+  /// Secret Key present locally. Throws [OmrUnauthorizedException] if unauthorized.
+  static Future<OmrResult> process(XFile imageFile, [AuthService? auth]) async {
+    // 1. Enforce local security check before executing any scanning logic
+    await _enforceAuthorization(auth);
+
     final bytes = await imageFile.readAsBytes();
     // Decode straight to grayscale, exactly like circles.py
     // (cv2.imread(path, IMREAD_GRAYSCALE)): the,Otsu ink mask and fill
@@ -191,13 +215,117 @@ class OmrService {
 
     final encoded = cv.imencode('.png', output);
 
-    return OmrResult(
+    final result = OmrResult(
       circleCount: bubbles.length,
       columnCount: layout.numGrids,
       filledCount: filledCount,
       results: results,
       imageBytes: encoded.$2,
     );
+
+    // 2. Decrement demo counter after a successful scan
+    final effectiveAuth = auth ?? AuthService.instance;
+    if (effectiveAuth != null) {
+      if (effectiveAuth.membershipType == 'demo') {
+        await effectiveAuth.onScanCompleted();
+      }
+    } else {
+      const secure = FlutterSecureStorage();
+      final keyType = await secure.read(key: 'secret_key_type');
+      if (keyType == 'demo') {
+        final demoStr = await secure.read(key: 'demo_scans_remaining');
+        // No stored count yet (server never stores demo scans): start at 20.
+        int count = int.tryParse(demoStr ?? '') ?? 20;
+        await secure.write(key: 'demo_scans_remaining', value: count.toString());
+        if (count > 0) {
+          count--;
+          await secure.write(
+            key: 'demo_scans_remaining',
+            value: count.toString(),
+          );
+          if (count <= 0) {
+            await secure.delete(key: 'secret_key');
+            await secure.delete(key: 'secret_key_type');
+            await secure.write(key: 'membership_type', value: 'none');
+          }
+        }
+      }
+    }
+
+    return result;
+  }
+
+  /// Auth-guarded entry point for OMR scanning.
+  ///
+  /// Forwards directly to [process] which enforces token and secret key
+  /// validity locally before running the algorithm.
+  static Future<OmrResult> processGuarded(
+    XFile imageFile,
+    AuthService auth,
+  ) async {
+    return process(imageFile, auth);
+  }
+
+  /// Enforces that the caller has both a valid, non-expired access token and
+  /// a valid, non-expired secret key. Throws [OmrUnauthorizedException] if not.
+  static Future<void> _enforceAuthorization([AuthService? auth]) async {
+    final effectiveAuth = auth ?? AuthService.instance;
+    if (effectiveAuth != null) {
+      try {
+        effectiveAuth.checkBeforeScan();
+      } on AuthGuardException catch (e) {
+        throw OmrUnauthorizedException(e.message, e.reason);
+      }
+      return;
+    }
+
+    // Direct check against secure storage if AuthService instance is not bound yet.
+    const secure = FlutterSecureStorage();
+    final token = await secure.read(key: 'access_token');
+    if (token == null || token.isEmpty) {
+      throw const OmrUnauthorizedException(
+          'Access token missing. Please log in.', AuthGuardReason.notLoggedIn);
+    }
+
+    final tokenExpiryStr = await secure.read(key: 'access_token_expiry');
+    final tokenExpiry =
+        tokenExpiryStr != null ? DateTime.tryParse(tokenExpiryStr) : null;
+    if (tokenExpiry == null || DateTime.now().isAfter(tokenExpiry)) {
+      await secure.delete(key: 'access_token');
+      await secure.delete(key: 'access_token_expiry');
+      throw const OmrUnauthorizedException(
+          'Access token expired. Please log in again.',
+          AuthGuardReason.sessionExpired);
+    }
+
+    final secretKey = await secure.read(key: 'secret_key');
+    if (secretKey == null || secretKey.isEmpty) {
+      throw const OmrUnauthorizedException(
+          'Secret key missing. Unauthorized to run OMR script.',
+          AuthGuardReason.noSecretKey);
+    }
+
+    final keyType = await secure.read(key: 'secret_key_type');
+    if (keyType == 'demo') {
+      final demoStr = await secure.read(key: 'demo_scans_remaining');
+      // Demo scans are tracked purely on-device; missing count means the full
+      // 20 scans are still available.
+      final demoLeft = int.tryParse(demoStr ?? '') ?? 20;
+      if (demoLeft <= 0) {
+        throw const OmrUnauthorizedException(
+            'Demo scans limit (20) reached. Unauthorized.',
+            AuthGuardReason.demoLimitReached);
+      }
+    } else if (keyType == 'paid') {
+      final keyExpiryStr = await secure.read(key: 'secret_key_expiry');
+      final keyExpiry =
+          keyExpiryStr != null ? DateTime.tryParse(keyExpiryStr) : null;
+      if (keyExpiry != null && DateTime.now().isAfter(keyExpiry)) {
+        throw const OmrUnauthorizedException(
+            'Paid secret key has expired. Unauthorized.',
+            AuthGuardReason.subscriptionExpired);
+      }
+    }
   }
 
   // ---------------------------------------------------------------------------
@@ -561,8 +689,9 @@ class OmrService {
     final gridIds = List<int>.filled(n, 0);
     var currentGrid = 0;
     for (var k = 1; k < n; k++) {
-      if (rotatedX[order[k]] - rotatedX[order[k - 1]] > gridGapThreshold)
+      if (rotatedX[order[k]] - rotatedX[order[k - 1]] > gridGapThreshold) {
         currentGrid++;
+      }
       gridIds[order[k]] = currentGrid;
     }
 
@@ -630,8 +759,9 @@ class OmrService {
     final clusterIds = List<int>.filled(n, 0);
     var current = 0;
     for (var k = 1; k < n; k++) {
-      if (values[order[k]] - values[order[k - 1]] > localGapThreshold)
+      if (values[order[k]] - values[order[k - 1]] > localGapThreshold) {
         current++;
+      }
       clusterIds[order[k]] = current;
     }
 
@@ -722,24 +852,17 @@ class OmrService {
     final gridIds = List<int>.filled(n, 0);
     var currentGrid = 0;
     for (var k = 1; k < n; k++) {
-      if (rotatedX[order[k]] - rotatedX[order[k - 1]] > gridGapThreshold)
+      if (rotatedX[order[k]] - rotatedX[order[k - 1]] > gridGapThreshold) {
         currentGrid++;
+      }
       gridIds[order[k]] = currentGrid;
     }
     final numGrids = currentGrid + 1;
 
     var questionOffset = 0;
 
-    // Per-grid outline colors. circles.py uses BGR tuples; Scalar.fromRgb
-    // maps (r,g,b) -> (b,g,r) channels, so each is the exact Python color.
-    final gridColors = [
-      cv.Scalar.fromRgb(0, 0, 255), // python (255,0,0)   - blue
-      cv.Scalar.fromRgb(255, 165, 0), // python (0,165,255) - orange
-      cv.Scalar.fromRgb(255, 0, 255), // python (255,0,255) - magenta
-      cv.Scalar.fromRgb(255, 255, 0), // python (0,255,255) - yellow
-      cv.Scalar.fromRgb(0, 255, 255), // python (255,255,0) - cyan
-      cv.Scalar.fromRgb(255, 0, 128), // python (128,0,255) - purple
-    ];
+    // Per-grid debug outline colors were removed with the (commented-out)
+    // grid-outline drawing pass.
 
     for (var gridId = 0; gridId < numGrids; gridId++) {
       final indices = [
@@ -764,7 +887,9 @@ class OmrService {
         var cur = 0;
         for (var k = 1; k < axisOrder.length; k++) {
           if (axisValues[axisOrder[k]] - axisValues[axisOrder[k - 1]] >
-              localGapThreshold) cur++;
+              localGapThreshold) {
+            cur++;
+          }
           ids[axisOrder[k]] = cur;
         }
         final counts = List<int>.filled(cur + 1, 0);
@@ -802,41 +927,8 @@ class OmrService {
           indices[k]: colResult.newIds[k],
       };
 
-      // Grid outline: the min-area rect of the grid's bubbles, expanded by
-      // 1.5 * bubble radius on every side, drawn closed (drawContours with
-      // thickness 3 in circles.py).
-      final gridColor = gridColors[gridId % gridColors.length];
-      {
-        final gridVec = cv.VecPoint.fromList([
-          for (final i in indices) cv.Point(detected[i].$1, detected[i].$2),
-        ]);
-        final rect = cv.minAreaRect(gridVec);
-        final margin = mostCommonRadius * 1.5;
-        final bw = rect.size.width + 2 * margin;
-        final bh = rect.size.height + 2 * margin;
-        final ra = rect.angle * math.pi / 180;
-        final bcx = rect.center.x;
-        final bcy = rect.center.y;
-        final dxx = 0.5 * bw * math.cos(ra);
-        final dxy = 0.5 * bw * math.sin(ra);
-        final dyx = -0.5 * bh * math.sin(ra);
-        final dyy = 0.5 * bh * math.cos(ra);
-        // boxPoints order; circles.py's boxPoints().astype(int) truncates.
-        int t(double v) => v.truncate();
-        final boxPts = [
-          cv.Point(t(bcx - dxx - dyx), t(bcy - dxy - dyy)),
-          cv.Point(t(bcx + dxx - dyx), t(bcy + dxy - dyy)),
-          cv.Point(t(bcx + dxx + dyx), t(bcy + dxy + dyy)),
-          cv.Point(t(bcx - dxx + dyx), t(bcy - dxy + dyy)),
-        ];
-        // cv.drawContours(
-        //   output,
-        //   cv.VecVecPoint.fromList([boxPts]),
-        //   0,
-        //   gridColor,
-        //   thickness: 3,
-        // );
-      }
+      // Grid outline drawing (drawContours) remains commented-out debug
+      // code in circles.py; nothing to draw here.
 
       // Draw a line through each row, following the sheet's own tilt, and
       // label the question number (continuing from the previous grid).

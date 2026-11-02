@@ -3,15 +3,15 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-import 'package:omr_scanner/app/router.dart';
-import 'package:omr_scanner/data/local_repository.dart';
-import 'package:omr_scanner/l10n/app_localizations.dart';
-import 'package:omr_scanner/models/exam.dart';
-import 'package:omr_scanner/theme/app_colors.dart';
-import 'package:omr_scanner/theme/app_text.dart';
-import 'package:omr_scanner/theme/app_theme.dart';
-import 'package:omr_scanner/widgets/app_card.dart';
-import 'package:omr_scanner/widgets/empty_state.dart';
+import 'package:master_ji/app/router.dart';
+import 'package:master_ji/data/local_repository.dart';
+import 'package:master_ji/l10n/app_localizations.dart';
+import 'package:master_ji/models/exam.dart';
+import 'package:master_ji/theme/app_colors.dart';
+import 'package:master_ji/theme/app_text.dart';
+import 'package:master_ji/theme/app_theme.dart';
+import 'package:master_ji/widgets/app_card.dart';
+import 'package:master_ji/widgets/empty_state.dart';
 
 /// Screen displaying the details of an exam, showing all subjects and progress.
 class ExamDetailScreen extends StatefulWidget {
@@ -95,15 +95,13 @@ class _ExamDetailScreenState extends State<ExamDetailScreen> {
                     const SizedBox(height: AppTheme.sp12),
                 itemBuilder: (context, index) {
                   final subject = subjects[index];
-                  final accentColor = AppColors.subjectPalette[
-                      index % AppColors.subjectPalette.length];
+                  final accentColor = AppColors
+                      .subjectPalette[index % AppColors.subjectPalette.length];
 
-                  final allSets =
-                      subject.papers.expand((p) => p.sets).toList();
+                  final allSets = subject.papers.expand((p) => p.sets).toList();
                   final totalSets = allSets.length;
                   final doneSets = allSets.where((s) => s.hasKey).length;
-                  final progress =
-                      totalSets > 0 ? doneSets / totalSets : 0.0;
+                  final progress = totalSets > 0 ? doneSets / totalSets : 0.0;
 
                   return _SubjectCard(
                     subject: subject,

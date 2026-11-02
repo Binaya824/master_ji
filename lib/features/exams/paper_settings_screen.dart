@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-import 'package:omr_scanner/data/local_repository.dart';
-import 'package:omr_scanner/l10n/app_localizations.dart';
-import 'package:omr_scanner/models/exam.dart';
-import 'package:omr_scanner/theme/app_colors.dart';
-import 'package:omr_scanner/theme/app_text.dart';
-import 'package:omr_scanner/theme/app_theme.dart';
-import 'package:omr_scanner/widgets/app_card.dart';
-import 'package:omr_scanner/widgets/empty_state.dart';
-import 'package:omr_scanner/widgets/primary_button.dart';
+import 'package:master_ji/data/local_repository.dart';
+import 'package:master_ji/l10n/app_localizations.dart';
+import 'package:master_ji/models/exam.dart';
+import 'package:master_ji/theme/app_colors.dart';
+import 'package:master_ji/theme/app_text.dart';
+import 'package:master_ji/theme/app_theme.dart';
+import 'package:master_ji/widgets/app_card.dart';
+import 'package:master_ji/widgets/empty_state.dart';
+import 'package:master_ji/widgets/primary_button.dart';
 
 /// Screen for configuring paper settings (question count, marks, negative marking, sets).
 class PaperSettingsScreen extends StatefulWidget {
@@ -131,7 +131,8 @@ class _PaperSettingsScreenState extends State<PaperSettingsScreen> {
     if (_selectedCountPreset == -1) {
       final parsed = int.tryParse(_customCountController.text.trim());
       if (parsed == null || parsed < 1 || parsed > 200) {
-        _showErrorSnackBar('Please enter a valid question count between 1 and 200');
+        _showErrorSnackBar(
+            'Please enter a valid question count between 1 and 200');
         return;
       }
       finalQuestionCount = parsed;
@@ -341,8 +342,8 @@ class _PaperSettingsScreenState extends State<PaperSettingsScreen> {
                 onPressed: _marksPerCorrect > 0.5
                     ? () {
                         setState(() {
-                          _marksPerCorrect = (_marksPerCorrect - 0.5)
-                              .clamp(0.5, 10.0);
+                          _marksPerCorrect =
+                              (_marksPerCorrect - 0.5).clamp(0.5, 10.0);
                         });
                       }
                     : null,
@@ -365,8 +366,8 @@ class _PaperSettingsScreenState extends State<PaperSettingsScreen> {
                 onPressed: _marksPerCorrect < 10.0
                     ? () {
                         setState(() {
-                          _marksPerCorrect = (_marksPerCorrect + 0.5)
-                              .clamp(0.5, 10.0);
+                          _marksPerCorrect =
+                              (_marksPerCorrect + 0.5).clamp(0.5, 10.0);
                         });
                       }
                     : null,

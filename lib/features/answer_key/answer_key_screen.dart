@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-import 'package:omr_scanner/data/local_repository.dart';
-import 'package:omr_scanner/l10n/app_localizations.dart';
-import 'package:omr_scanner/models/exam.dart';
-import 'package:omr_scanner/services/scan_service.dart';
-import 'package:omr_scanner/services/storage_service.dart';
-import 'package:omr_scanner/theme/app_colors.dart';
-import 'package:omr_scanner/theme/app_text.dart';
-import 'package:omr_scanner/theme/app_theme.dart';
-import 'package:omr_scanner/widgets/primary_button.dart';
+import 'package:master_ji/data/local_repository.dart';
+import 'package:master_ji/l10n/app_localizations.dart';
+import 'package:master_ji/models/exam.dart';
+import 'package:master_ji/services/scan_service.dart';
+import 'package:master_ji/services/storage_service.dart';
+import 'package:master_ji/theme/app_colors.dart';
+import 'package:master_ji/theme/app_text.dart';
+import 'package:master_ji/theme/app_theme.dart';
+import 'package:master_ji/widgets/primary_button.dart';
 
 import 'answer_grid.dart';
 

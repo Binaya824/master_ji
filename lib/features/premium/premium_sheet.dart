@@ -128,7 +128,7 @@ class _PremiumSheetState extends State<PremiumSheet> {
               // CTA button
               if (!account.isLoggedIn)
                 PrimaryButton(
-                  label: l10n.continueWithGoogleToUpgrade,
+                  label: 'Log in to upgrade',
                   onPressed: () {
                     Navigator.of(context).pop();
                     context.push('${AppRoutes.login}?from=premium');

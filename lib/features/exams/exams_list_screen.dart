@@ -3,18 +3,18 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-import 'package:omr_scanner/app/router.dart';
-import 'package:omr_scanner/data/account_state.dart';
-import 'package:omr_scanner/data/local_repository.dart';
-import 'package:omr_scanner/features/premium/premium_sheet.dart';
-import 'package:omr_scanner/l10n/app_localizations.dart';
-import 'package:omr_scanner/models/exam.dart';
-import 'package:omr_scanner/theme/app_colors.dart';
-import 'package:omr_scanner/theme/app_text.dart';
-import 'package:omr_scanner/theme/app_theme.dart';
-import 'package:omr_scanner/widgets/app_card.dart';
-import 'package:omr_scanner/widgets/empty_state.dart';
-import 'package:omr_scanner/widgets/primary_button.dart';
+import 'package:master_ji/app/router.dart';
+import 'package:master_ji/data/account_state.dart';
+import 'package:master_ji/data/local_repository.dart';
+import 'package:master_ji/features/premium/premium_sheet.dart';
+import 'package:master_ji/l10n/app_localizations.dart';
+import 'package:master_ji/models/exam.dart';
+import 'package:master_ji/theme/app_colors.dart';
+import 'package:master_ji/theme/app_text.dart';
+import 'package:master_ji/theme/app_theme.dart';
+import 'package:master_ji/widgets/app_card.dart';
+import 'package:master_ji/widgets/empty_state.dart';
+import 'package:master_ji/widgets/primary_button.dart';
 
 /// Screen listing all exams or showing locked state for free users.
 class ExamsListScreen extends StatefulWidget {
@@ -175,10 +175,7 @@ class _ExamsListScreenState extends State<ExamsListScreen> {
             },
             onRename: () => _showRenameDialog(exam),
             onDelete: () => _showDeleteDialog(exam),
-          )
-              .animate()
-              .fade(duration: 300.ms, delay: (40 * index).ms)
-              .slideY(
+          ).animate().fade(duration: 300.ms, delay: (40 * index).ms).slideY(
                 begin: 0.08,
                 end: 0,
                 duration: 300.ms,

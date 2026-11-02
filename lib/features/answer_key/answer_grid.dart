@@ -2,10 +2,10 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:omr_scanner/l10n/app_localizations.dart';
-import 'package:omr_scanner/theme/app_colors.dart';
-import 'package:omr_scanner/theme/app_text.dart';
-import 'package:omr_scanner/theme/app_theme.dart';
+import 'package:master_ji/l10n/app_localizations.dart';
+import 'package:master_ji/theme/app_colors.dart';
+import 'package:master_ji/theme/app_text.dart';
+import 'package:master_ji/theme/app_theme.dart';
 
 /// Reusable widget for displaying, entering, and reviewing OMR answer keys.
 class AnswerGrid extends StatefulWidget {
@@ -253,9 +253,8 @@ class _AnswerGridState extends State<AnswerGrid> {
                     color: isSelected ? AppColors.primary : AppColors.surface,
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: isSelected
-                          ? AppColors.primary
-                          : AppColors.cardBorder,
+                      color:
+                          isSelected ? AppColors.primary : AppColors.cardBorder,
                       width: 1.5,
                     ),
                   ),

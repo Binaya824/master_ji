@@ -1,4 +1,4 @@
-# omr_scanner
+# master_ji
 
 A new Flutter project.
 

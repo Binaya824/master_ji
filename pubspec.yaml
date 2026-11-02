@@ -1,5 +1,5 @@
-name: omr_scanner
-description: "MasterJi – OMR sheet checker for teachers"
+name: master_ji
+descripion: "MasterJi – OMR sheet checker for teachers"
 publish_to: 'none'
 version: 1.0.0+1
 
@@ -25,6 +25,7 @@ dependencies:
 
   # Storage
   shared_preferences: ^2.3.2
+  flutter_secure_storage: ^9.2.2
 
   # Localisation
   intl: ^0.20.2
@@ -40,12 +41,24 @@ dependencies:
   share_plus: ^10.1.2
   url_launcher: ^6.3.1
   package_info_plus: ^8.1.1
+  device_info_plus: ^11.0.0
   uuid: ^4.5.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^5.0.0
+  flutter_launcher_icons: ^0.14.4
+
+# App launcher icon — matches the splash-screen logo (white document-scanner
+# glyph inside a translucent white circle over AppColors.primary teal).
+flutter_launcher_icons:
+  image_path: assets/icon/masterji_icon.png
+  android: true
+  ios: true
+  remove_alpha_ios: true
+  adaptive_icon_background: assets/icon/masterji_icon_background.png
+  adaptive_icon_foreground: assets/icon/masterji_icon_foreground.png
 
 flutter:
   generate: true

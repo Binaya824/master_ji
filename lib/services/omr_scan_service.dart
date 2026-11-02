@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import '../../features/premium/premium_gate.dart';
 import '../widgets/image_source_sheet.dart';
+import 'auth_service.dart';
 import 'omr_service.dart';
 import 'scan_service.dart';
 
@@ -13,27 +16,21 @@ class OmrScanService implements ScanService {
     required int questionCount,
   }) async {
     final file = await pickImageFromSource(context);
-    if (file == null) return null;
+    if (file == null || !context.mounted) return null;
 
     try {
-      final omrResult = await OmrService.process(file);
+      final auth = context.read<AuthService>();
+      final omrResult = await OmrService.processGuarded(file, auth);
       final Map<int, int> answers = {};
       for (int i = 1; i <= questionCount; i++) {
         answers[i] = omrResult.results['$i'] ?? 0;
       }
       return answers;
     } catch (e) {
-      debugPrint('Error scanning OMR sheet: $e');
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Failed to process OMR sheet: ${e.toString().replaceAll('Exception: ', '')}',
-            ),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
+      // Demo finished / key missing / subscription expired → premium upsell
+      // sheet; other failures → error snackbar.
+      if (!context.mounted) return null;
+      await PremiumGate.handleScanBlock(context, e);
       return null;
     }
   }

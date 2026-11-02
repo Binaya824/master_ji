@@ -2,16 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-import 'package:omr_scanner/app/router.dart';
-import 'package:omr_scanner/data/local_repository.dart';
-import 'package:omr_scanner/l10n/app_localizations.dart';
-import 'package:omr_scanner/models/exam.dart';
-import 'package:omr_scanner/theme/app_colors.dart';
-import 'package:omr_scanner/theme/app_text.dart';
-import 'package:omr_scanner/theme/app_theme.dart';
-import 'package:omr_scanner/widgets/app_card.dart';
-import 'package:omr_scanner/widgets/empty_state.dart';
-import 'package:omr_scanner/widgets/primary_button.dart';
+import 'package:master_ji/app/router.dart';
+import 'package:master_ji/data/local_repository.dart';
+import 'package:master_ji/l10n/app_localizations.dart';
+import 'package:master_ji/models/exam.dart';
+import 'package:master_ji/theme/app_colors.dart';
+import 'package:master_ji/theme/app_text.dart';
+import 'package:master_ji/theme/app_theme.dart';
+import 'package:master_ji/widgets/app_card.dart';
+import 'package:master_ji/widgets/empty_state.dart';
+import 'package:master_ji/widgets/primary_button.dart';
 
 /// Bottom sheet for picking:
 /// 1. Exam
@@ -271,9 +271,8 @@ class _ExamScanPickerSheetState extends State<ExamScanPickerSheet> {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: isSelected
-                        ? AppColors.primary
-                        : AppColors.primarySoft,
+                    color:
+                        isSelected ? AppColors.primary : AppColors.primarySoft,
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Icon(
@@ -432,8 +431,7 @@ class _ExamScanPickerSheetState extends State<ExamScanPickerSheet> {
                 selected: isSelected,
                 selectedColor: AppColors.primarySoft,
                 side: BorderSide(
-                  color:
-                      isSelected ? AppColors.primary : AppColors.cardBorder,
+                  color: isSelected ? AppColors.primary : AppColors.cardBorder,
                 ),
                 onSelected: (selected) {
                   if (selected) {

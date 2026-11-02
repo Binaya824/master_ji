@@ -3,15 +3,15 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-import 'package:omr_scanner/app/router.dart';
-import 'package:omr_scanner/data/local_repository.dart';
-import 'package:omr_scanner/l10n/app_localizations.dart';
-import 'package:omr_scanner/models/exam.dart';
-import 'package:omr_scanner/theme/app_colors.dart';
-import 'package:omr_scanner/theme/app_text.dart';
-import 'package:omr_scanner/theme/app_theme.dart';
-import 'package:omr_scanner/widgets/app_card.dart';
-import 'package:omr_scanner/widgets/empty_state.dart';
+import 'package:master_ji/app/router.dart';
+import 'package:master_ji/data/local_repository.dart';
+import 'package:master_ji/l10n/app_localizations.dart';
+import 'package:master_ji/models/exam.dart';
+import 'package:master_ji/theme/app_colors.dart';
+import 'package:master_ji/theme/app_text.dart';
+import 'package:master_ji/theme/app_theme.dart';
+import 'package:master_ji/widgets/app_card.dart';
+import 'package:master_ji/widgets/empty_state.dart';
 
 /// Screen displaying the papers (by class) for a selected subject in an exam.
 class SubjectDetailScreen extends StatefulWidget {
@@ -47,7 +47,8 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
     Subject? foundSubject;
     if (exam != null) {
       try {
-        foundSubject = exam.subjects.firstWhere((s) => s.id == widget.subjectId);
+        foundSubject =
+            exam.subjects.firstWhere((s) => s.id == widget.subjectId);
       } catch (_) {
         foundSubject = null;
       }

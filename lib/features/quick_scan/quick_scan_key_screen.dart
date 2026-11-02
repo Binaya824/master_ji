@@ -2,18 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-import 'package:omr_scanner/app/router.dart';
-import 'package:omr_scanner/data/local_repository.dart';
-import 'package:omr_scanner/features/answer_key/answer_grid.dart';
-import 'package:omr_scanner/l10n/app_localizations.dart';
-import 'package:omr_scanner/models/quick_scan_state.dart';
-import 'package:omr_scanner/services/omr_service.dart';
-import 'package:omr_scanner/services/storage_service.dart';
-import 'package:omr_scanner/theme/app_colors.dart';
-import 'package:omr_scanner/theme/app_text.dart';
-import 'package:omr_scanner/theme/app_theme.dart';
-import 'package:omr_scanner/widgets/image_source_sheet.dart';
-import 'package:omr_scanner/widgets/primary_button.dart';
+import 'package:master_ji/app/router.dart';
+import 'package:master_ji/data/local_repository.dart';
+import 'package:master_ji/features/answer_key/answer_grid.dart';
+import 'package:master_ji/l10n/app_localizations.dart';
+import 'package:master_ji/models/quick_scan_state.dart';
+import 'package:master_ji/services/omr_service.dart';
+import 'package:master_ji/services/auth_service.dart';
+import 'package:master_ji/features/premium/premium_gate.dart';
+import 'package:master_ji/services/storage_service.dart';
+import 'package:master_ji/theme/app_colors.dart';
+import 'package:master_ji/theme/app_text.dart';
+import 'package:master_ji/theme/app_theme.dart';
+import 'package:master_ji/widgets/image_source_sheet.dart';
+import 'package:master_ji/widgets/primary_button.dart';
 
 /// Screen for scanning or manually entering the answer key for Quick Scan.
 class QuickScanKeyScreen extends StatefulWidget {
@@ -69,6 +71,7 @@ class _QuickScanKeyScreenState extends State<QuickScanKeyScreen> {
     final state = _state;
     if (state == null) return;
 
+    final auth = context.read<AuthService>();
     final picked = await pickImageFromSource(context);
     if (picked == null) return;
 
@@ -77,8 +80,8 @@ class _QuickScanKeyScreenState extends State<QuickScanKeyScreen> {
     });
 
     try {
-      // Parse photo using the exact OmrService
-      final omrResult = await OmrService.process(picked);
+      // Parse photo using the exact OmrService — guarded by auth + secret key
+      final omrResult = await OmrService.processGuarded(picked, auth);
 
       // Save both the output image and answer key json (including zero values)
       await StorageService.saveAnswerKey(omrResult);
@@ -127,15 +130,7 @@ class _QuickScanKeyScreenState extends State<QuickScanKeyScreen> {
     } catch (e) {
       debugPrint('Error scanning answer key: $e');
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Failed to process OMR sheet: ${e.toString().replaceAll('Exception: ', '')}',
-          ),
-          backgroundColor: AppColors.wrong,
-          duration: const Duration(seconds: 4),
-        ),
-      );
+      await PremiumGate.handleScanBlock(context, e);
     } finally {
       if (mounted) {
         setState(() {
