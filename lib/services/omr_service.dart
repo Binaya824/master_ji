@@ -193,6 +193,25 @@ class OmrService {
     final layout =
         _layoutGrids(bubbles, questionOf, optionOf, output, mostCommonRadius);
 
+    // A bubble so heavily inked-in that its printed outline is gone has no
+    // circular edge for Hough to find at all, no matter the contrast - it's
+    // simply missing from `bubbles`. _layoutGrids already knows, from every
+    // OTHER bubble in that row/column, exactly where such a slot should be,
+    // so only synthesize (never guess at) positions for grids that actually
+    // came up short.
+    if (layout.synthesized.isNotEmpty) {
+      bubbles = [...bubbles, ...layout.synthesized];
+      for (final b in layout.synthesized) {
+        cv.circle(
+          output,
+          cv.Point(b.$1, b.$2),
+          mostCommonRadius,
+          cv.Scalar.fromRgb(0, 0, 255),
+          thickness: 2,
+        );
+      }
+    }
+
     final filled = <_Bubble, bool>{};
     var filledCount = 0;
 
@@ -391,7 +410,13 @@ class OmrService {
   // ---------------------------------------------------------------------------
 
   static List<_RawBubble> _detectBubbles(cv.Mat gray) {
-    final blurred = cv.gaussianBlur(gray, (7, 7), 1.5);
+    // CLAHE-boost before blurring, not just in the bottom-row completion
+    // pass below - faint/low-contrast bubble outlines (shadowed photos,
+    // light photocopies) otherwise fall under Hough's gradient threshold
+    // in pass 1/2 and never get detected at all, not even as a recoverable
+    // "missed bottom row".
+    final clahe = cv.CLAHE(3.0, (8, 8));
+    final blurred = cv.gaussianBlur(clahe.apply(gray), (7, 7), 1.5);
 
     // Pass 1: wide radius net, just to estimate this sheet's real bubble size.
     final wide = cv.HoughCircles(
@@ -414,11 +439,14 @@ class OmrService {
     final lo = math.max(4, (medianR * 0.7).floor());
     final hi = (medianR * 1.3).floor() + 1;
 
-    // Pass 2: tight radius window sized to the real bubbles -> far better recall.
+    // Pass 2: tight radius window sized to the real bubbles -> far better
+    // recall. dp tightened to 1.0 (vs pass 1's coarser 1.2, which only
+    // needs a radius estimate): a finer Hough accumulator fits these final
+    // circle centers more precisely instead of snapping to a coarser grid.
     final found = cv.HoughCircles(
       blurred,
       cv.HOUGH_GRADIENT,
-      1.2,
+      1.0,
       medianR * 1.6,
       param1: 60,
       param2: 30,
@@ -446,14 +474,11 @@ class OmrService {
     if (circles.length >= 8) {
       final medR = _median([for (final c in circles) c.$3.toDouble()]);
       final pitch = _median(_nearestNeighborDistances(circles));
-      final clahe = cv.CLAHE(3.0, (8, 8));
-      // circles.py CLAHE-boosts the raw working-res gray (clahe.apply(work))
-      // BEFORE blurring - CLAHE response through a prior blur differs.
-      final boosted = cv.gaussianBlur(clahe.apply(gray), (7, 7), 1.5);
+      // `blurred` above is already CLAHE-boosted now, so no need to redo it.
       // Wide radius net on the boosted image so both normal and
       // perspective-shrunken bottom bubbles fall inside the window.
       final extra = cv.HoughCircles(
-        boosted,
+        blurred,
         cv.HOUGH_GRADIENT,
         1.2,
         12,
@@ -832,15 +857,19 @@ class OmrService {
   // to the typical bubble-to-bubble spacing.
   // ---------------------------------------------------------------------------
 
-  static ({int numGrids, int totalQuestions}) _layoutGrids(
+  static ({int numGrids, int totalQuestions, List<_Bubble> synthesized})
+      _layoutGrids(
     List<_Bubble> detected,
     Map<_Bubble, int> questionOf,
     Map<_Bubble, int> optionOf,
     cv.Mat output,
     int mostCommonRadius,
   ) {
+    final synthesized = <_Bubble>[];
     final n = detected.length;
-    if (n < 2) return (numGrids: 0, totalQuestions: 0);
+    if (n < 2) {
+      return (numGrids: 0, totalQuestions: 0, synthesized: synthesized);
+    }
 
     final xs = [for (final b in detected) b.$1.toDouble()];
     final ys = [for (final b in detected) b.$2.toDouble()];
@@ -950,6 +979,9 @@ class OmrService {
         for (var k = 0; k < indices.length; k++)
           indices[k]: colResult.newIds[k],
       };
+      // Option count isn't assumed fixed (e.g. always 4) - it's whatever
+      // this grid's own columns clustered into.
+      final numCols = colResult.numKept;
 
       // Grid outline drawing (drawContours) remains commented-out debug
       // code in circles.py; nothing to draw here.
@@ -994,6 +1026,7 @@ class OmrService {
         // );
       }
 
+      final presentSlots = <(int, int)>{};
       for (final i in indices) {
         // Dropped rows/columns (stray glyph bubbles): excluded from
         // question numbering.
@@ -1001,13 +1034,67 @@ class OmrService {
           final bubble = detected[i];
           questionOf[bubble] = questionOffset + rowIds[i]! + 1;
           optionOf[bubble] = colIds[i]! + 1; // 1=A, 2=B, 3=C, 4=D...
+          presentSlots.add((rowIds[i]!, colIds[i]!));
+        }
+      }
+
+      // A bubble inked-in solidly enough to erase its own printed outline
+      // has no circular edge left for Hough to find, no matter the image
+      // contrast - it's just absent from `detected`. Only chase this when
+      // this grid actually came up short of a full rows x cols rectangle;
+      // most sheets scan clean and this is skipped entirely.
+      if (presentSlots.length < numRows * numCols) {
+        // Column data kept as (y, x) pairs, not a flat x average: a
+        // missing bubble's x comes from fitting a line through its own
+        // column's other bubbles and evaluating that line at the target
+        // row's y, so it lands on the same straight angle as the rest of
+        // the column even when the column itself is slightly slanted
+        // relative to the sheet's one global tilt correction.
+        final colRY = <int, List<double>>{};
+        final colRX = <int, List<double>>{};
+        final rowRY = <int, List<double>>{};
+        for (final i in indices) {
+          final r = rowIds[i]!;
+          final c = colIds[i]!;
+          if (r < 0 || c < 0) continue;
+          colRY.putIfAbsent(c, () => []).add(rotatedY[i]);
+          colRX.putIfAbsent(c, () => []).add(rotatedX[i]);
+          rowRY.putIfAbsent(r, () => []).add(rotatedY[i]);
+        }
+        final rowCenterRY = {
+          for (final e in rowRY.entries) e.key: _median(e.value),
+        };
+
+        for (var r = 0; r < numRows; r++) {
+          for (var c = 0; c < numCols; c++) {
+            if (presentSlots.contains((r, c))) continue;
+            // Needs a real neighbor sharing this slot's row AND column to
+            // interpolate from - an empty row or column has nothing to
+            // synthesize a position from, and is left missing as before.
+            final ry = rowCenterRY[r];
+            final colYs = colRY[c];
+            final colXs = colRX[c];
+            if (ry == null || colYs == null || colXs == null) continue;
+
+            final rx = _lineX(colYs, colXs, ry);
+            final origX = cx + rx * cosA - ry * sinA;
+            final origY = cy + rx * sinA + ry * cosA;
+            final bubble = (origX.round(), origY.round(), mostCommonRadius);
+            synthesized.add(bubble);
+            questionOf[bubble] = questionOffset + r + 1;
+            optionOf[bubble] = c + 1;
+          }
         }
       }
 
       questionOffset += numRows;
     }
 
-    return (numGrids: numGrids, totalQuestions: questionOffset);
+    return (
+      numGrids: numGrids,
+      totalQuestions: questionOffset,
+      synthesized: synthesized,
+    );
   }
 
   // ---------------------------------------------------------------------------
@@ -1071,5 +1158,24 @@ class OmrService {
     final middle = sorted.length ~/ 2;
     if (sorted.length.isOdd) return sorted[middle];
     return (sorted[middle - 1] + sorted[middle]) / 2;
+  }
+
+  /// Least-squares fit of x as a function of y through one column's own
+  /// bubbles, evaluated at [atY] - so a synthesized bubble lands on that
+  /// column's own straight line/angle instead of a flat average x.
+  static double _lineX(List<double> ys, List<double> xs, double atY) {
+    final n = ys.length;
+    if (n == 1) return xs.first;
+    final meanY = _mean(ys);
+    final meanX = _mean(xs);
+    var num = 0.0;
+    var den = 0.0;
+    for (var i = 0; i < n; i++) {
+      num += (ys[i] - meanY) * (xs[i] - meanX);
+      den += (ys[i] - meanY) * (ys[i] - meanY);
+    }
+    if (den == 0) return meanX; // column's points share one y - no slope info
+    final slope = num / den;
+    return slope * (atY - meanY) + meanX;
   }
 }
