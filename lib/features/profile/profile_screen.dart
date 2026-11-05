@@ -288,14 +288,58 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ],
 
             // ── Log Out Button ──────────────────────────────────────────────
-            // Intentionally removed: there is no manual logout. The session
-            // ends automatically after the 5-day access token expiry.
+            if (account.isLoggedIn) ...[
+              OutlinedButton.icon(
+                onPressed: () => _confirmLogout(context, account),
+                icon: const Icon(Icons.logout_rounded, size: 18),
+                label: const Text('Log out'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.wrong,
+                  side: const BorderSide(color: AppColors.wrong),
+                  minimumSize:
+                      const Size(double.infinity, AppTheme.minTouchTarget),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(AppTheme.radiusButton),
+                  ),
+                ),
+              ),
+              const SizedBox(height: AppTheme.sp16),
+            ],
 
             const SizedBox(height: AppTheme.sp32),
           ],
         ),
       ),
     );
+  }
+
+  Future<void> _confirmLogout(
+      BuildContext context, AccountState account) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Log out?'),
+        content: const Text(
+          "You'll need to log in again to scan.",
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text(
+              'Log out',
+              style: TextStyle(color: AppColors.wrong),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) {
+      await account.logout();
+    }
   }
 
   Future<void> _showEditSchoolSheet(

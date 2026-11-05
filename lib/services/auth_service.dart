@@ -279,6 +279,12 @@ class AuthService extends ChangeNotifier {
               'mobile': mobile,
               'password': password,
               'device_id': deviceId,
+              // Whatever this device currently has cached (may be null, e.g.
+              // after a reinstall/data wipe) - the server uses this to spot
+              // demo-scan farming instead of a login-history time window.
+              'secret_key': _secretKey,
+              'membership_type':
+                  _membershipType == 'none' ? null : _membershipType,
             }),
           )
           .timeout(const Duration(seconds: 15));
@@ -308,10 +314,15 @@ class AuthService extends ChangeNotifier {
     }
   }
 
-  /// Log out: clear all auth data from local secure storage and memory.
-  /// 100% local operation — no server call required.
+  /// Log out: clear only the access token (and its expiry) from local
+  /// secure storage and memory. Secret key, membership type, demo-scan
+  /// count, and profile info are intentionally kept, so logging back in
+  /// doesn't hand out a fresh demo count. 100% local — no server call.
   Future<void> logout() async {
-    await _clearAuthData();
+    _accessToken = null;
+    _accessTokenExpiry = null;
+    await _secure.delete(key: _keyAccessToken);
+    await _secure.delete(key: _keyAccessTokenExpiry);
     notifyListeners();
   }
 
